@@ -1,0 +1,1678 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; font-src 'none'; connect-src 'none'; media-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="description" content="AutoClaw Legal Shield — local contract review, clause risk matrix, redline drafting, fact timeline and PII scrubbing for legal teams.">
+<title>AutoClaw Legal Shield — Contract review, risk & redlines</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%230b0d12'/%3E%3Cpath d='M12 5v14M7 19h10M12 7l-5 2m5-2 5 2M4.5 13l2-5 2 5a2.4 2.4 0 0 1-4 0zM15.5 13l2-5 2 5a2.4 2.4 0 0 1-4 0z' fill='none' stroke='%23c9a35b' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<!-- Demo application. Style inspired by Linear's dark interface language; not affiliated. Sample agreements are illustrative, not real contracts. -->
+<style>
+*{box-sizing:border-box;margin:0}
+:root{
+  --bg:#0b0d12;--panel:#10131a;--raised:#161a23;--hover:#1c2130;
+  --ink:#ece7da;--body:#c7cad3;--muted:#8f96a6;--faint:#7c8496;
+  --line:rgba(255,255,255,.07);--line2:rgba(255,255,255,.12);
+  --accent:#c9a35b;--accent-ink:#e8ce93;--accent-dim:rgba(201,163,91,.13);
+  --high:#f08e91;--high-bg:rgba(229,72,77,.13);--high-line:rgba(229,72,77,.34);
+  --med:#eec06a;--med-bg:rgba(224,163,62,.12);--med-line:rgba(224,163,62,.32);
+  --low:#7ed48a;--low-bg:rgba(76,174,92,.12);--low-line:rgba(76,174,92,.3);
+  --font-display:'Iowan Old Style','Palatino Linotype',Palatino,'Book Antiqua',Georgia,'Times New Roman',serif;
+  --font-ui:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+  --font-mono:ui-monospace,'Cascadia Mono',Consolas,'SF Mono',Menlo,monospace;
+}
+html{color-scheme:dark}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:6px;border:2px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.22);background-clip:padding-box;border:2px solid transparent}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-corner{background:transparent}
+body{background:var(--bg);color:var(--ink);font:400 14.5px/1.55 var(--font-ui);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+::selection{background:rgba(201,163,91,.3)}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+h1,h2,h3{font-weight:600}
+[hidden]{display:none!important}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.ic{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+/* shell */
+.app{display:flex;min-height:100vh}
+.sidebar{position:fixed;inset:0 auto 0 0;width:248px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;z-index:40}
+.brand{display:flex;align-items:center;gap:11px;padding:18px 18px 15px;border-bottom:3px double var(--line2)}
+.brand .mark{width:34px;height:34px;border-radius:9px;background:var(--accent-dim);display:grid;place-items:center;color:var(--accent-ink);border:1px solid rgba(201,163,91,.28)}
+.brand .mark .ic{width:20px;height:20px}
+.brand .word{font-family:var(--font-display);font-size:17px;letter-spacing:-.01em;line-height:1.15}
+.brand .sub{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-top:2px}
+.nav{padding:12px 10px;display:grid;gap:2px}
+.nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;color:var(--body);font-size:13.5px;font-weight:500;transition:background .15s,color .15s}
+.nav a .ic{color:var(--muted);width:17px;height:17px}
+.nav a:hover{background:var(--raised);color:var(--ink)}
+.nav a[aria-current="page"]{background:var(--accent-dim);color:var(--accent-ink)}
+.nav a[aria-current="page"] .ic{color:var(--accent)}
+.sidefoot{margin-top:auto;padding:13px 16px 16px;border-top:1px solid var(--line);display:grid;gap:9px;font-size:11.5px;color:var(--faint)}
+.sidefoot .badge{align-self:start}
+.sidefoot button{justify-self:start;color:var(--muted);font-size:11.5px;padding:2px 0;border-bottom:1px dotted rgba(255,255,255,.2)}
+.sidefoot button:hover{color:var(--ink)}
+.maincol{flex:1;margin-left:248px;display:flex;flex-direction:column;min-width:0}
+.topbar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:10px;height:56px;padding:0 22px;background:rgba(11,13,18,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar .title{font-size:13px;font-weight:500;color:var(--body);letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar .spacer{flex:1}
+#menuBtn{display:none}
+main{width:100%;max-width:1180px;margin:0 auto;padding:26px 26px 70px}
+.view{display:none}
+.view.on{display:block;animation:viewIn .26s cubic-bezier(.2,0,0,1)}
+@keyframes viewIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* atoms */
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:.02em;color:var(--muted);border:1px solid var(--line);padding:4px 9px;border-radius:999px;background:var(--panel);white-space:nowrap}
+.badge .ic{width:13px;height:13px}
+.badge.ok{color:var(--body);border-color:rgba(201,163,91,.26)}
+.badge.ok .ic{color:var(--accent-ink)}
+.badge .t-short{display:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:8px 14px;min-height:36px;border-radius:8px;border:1px solid var(--line2);background:var(--raised);color:var(--ink);font-size:13px;font-weight:500;transition:background .15s,border-color .15s,transform .06s}
+.btn:hover{background:var(--hover);border-color:rgba(255,255,255,.18)}
+.btn:active{transform:translateY(1px)}
+.btn .ic{width:16px;height:16px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#171106;font-weight:600}
+.btn.primary:hover{background:#d9b573;border-color:#d9b573}
+.btn.quiet{background:transparent;border-color:var(--line)}
+.btn.quiet:hover{background:var(--raised)}
+.btn.danger{color:var(--high)}
+.btn.sm{padding:6px 11px;min-height:31px;font-size:12.5px}
+.btn[disabled]{opacity:.45;cursor:not-allowed;transform:none}
+.icon-btn{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid var(--line2);background:var(--raised);color:var(--body)}
+.icon-btn:hover{color:var(--ink);background:var(--hover)}
+.icon-btn .ic{width:17px;height:17px}
+.link{font-size:12.5px;color:var(--accent-ink);border-bottom:1px solid rgba(201,163,91,.35);padding-bottom:1px}
+.link:hover{color:var(--ink)}
+.eyebrow{display:flex;align-items:center;gap:9px;font-size:10.5px;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--accent-ink)}
+.eyebrow .rule{width:22px;height:1px;background:var(--accent);opacity:.7}
+.lede{color:var(--muted);max-width:66ch;margin-top:9px;font-size:14px}
+.vh{margin-bottom:20px}
+.vh h1{font-family:var(--font-display);font-size:clamp(24px,2.4vw,30px);letter-spacing:-.018em;line-height:1.12;margin-top:8px;font-weight:600}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;min-height:28px;border:1px solid var(--line2);border-radius:999px;font-size:12px;color:var(--body);background:transparent;transition:background .15s,border-color .15s}
+.chip:hover{background:var(--raised)}
+.chip.on{background:var(--accent-dim);border-color:rgba(201,163,91,.34);color:var(--accent-ink)}
+.chip b{font-weight:600;font-variant-numeric:tabular-nums}
+#docChipDot{width:6px;height:6px;border-radius:50%;background:var(--faint);flex:none}
+#docChipName{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sev{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:5px;white-space:nowrap}
+.sev::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+.sev.high{color:var(--high);background:var(--high-bg)}
+.sev.medium{color:var(--med);background:var(--med-bg)}
+.sev.low{color:var(--low);background:var(--low-bg)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;min-width:0}
+.panel h2{font-family:var(--font-display);font-size:17px;letter-spacing:-.012em;font-weight:600}
+.panel .hint{color:var(--muted);font-size:12.5px;margin-top:3px;line-height:1.5}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.ph .hint{margin-top:2px}
+.stack{display:grid;gap:14px;align-content:start;min-width:0}
+.two{display:grid;grid-template-columns:1.6fr 1fr;gap:14px;align-items:start;margin-bottom:14px}
+.two>*{min-width:0}
+.dim{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+
+/* hero + kpi */
+.hero{padding:6px 0 4px;border-bottom:1px solid var(--line);margin-bottom:0;padding-bottom:22px}
+.hero h1{font-family:var(--font-display);font-weight:600;font-size:clamp(30px,4vw,42px);line-height:1.06;letter-spacing:-.022em;margin-top:12px}
+.hero .lede{max-width:62ch}
+.hero-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:18px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:20px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:15px 16px 13px}
+.kpi .lab{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.kpi .lab .ic{width:13px;height:13px;color:var(--faint)}
+.kpi .val{font-family:var(--font-display);font-size:31px;line-height:1.1;margin-top:9px;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.kpi .val small{font-family:var(--font-ui);font-size:12px;color:var(--faint);letter-spacing:0;margin-left:2px}
+.kpi .sub{font-size:11.5px;color:var(--faint);margin-top:3px}
+.dash-grid{display:grid;grid-template-columns:minmax(0,1fr) 312px;gap:14px;margin-top:14px;align-items:start}
+.dash-grid>*{min-width:0}
+
+/* bars */
+.bar-row{display:grid;grid-template-columns:minmax(120px,168px) 1fr 34px;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.bar-row:last-child{border-bottom:0}
+.bar-row .bl{display:flex;align-items:center;gap:7px;color:var(--body);min-width:0}
+.bar-row .bl span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-row .dot{width:6px;height:6px;border-radius:50%;flex:none}
+.bar-row .track{height:7px;border-radius:4px;background:rgba(255,255,255,.05);overflow:hidden}
+.bar-row .fill{display:block;height:100%;border-radius:4px;background:var(--accent);opacity:.85}
+.bar-row .ct{text-align:right;color:var(--muted);font-size:12px}
+
+/* tables */
+.table-scroll{overflow-x:auto;margin:0 -6px;max-width:100%}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;min-width:520px}
+.tbl th{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:600;padding:7px 10px;border-bottom:1px solid var(--line2);white-space:nowrap}
+.tbl td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tbody tr:hover td{background:rgba(255,255,255,.02)}
+.tbl .name{font-family:var(--font-display);font-size:13.5px;letter-spacing:-.005em}
+.tbl .sub{display:block;font-size:11px;color:var(--faint);margin-top:1px;font-family:var(--font-ui)}
+.tbl .mono{font-family:var(--font-mono);font-size:12px;color:var(--body)}
+.tbl .evd{font-family:var(--font-mono);font-size:11.5px;color:var(--muted);line-height:1.5;max-width:420px;overflow-wrap:anywhere}
+.tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--body);border:1px solid var(--line);background:var(--raised);border-radius:5px;padding:2px 7px;white-space:nowrap}
+.status{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);white-space:nowrap}
+.status::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--faint)}
+.status.ok{color:var(--low)}.status.ok::before{background:var(--low)}
+.status.run{color:var(--med)}.status.run::before{background:var(--med);animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+
+/* dropzone + forms */
+.drop{border:1.5px dashed rgba(255,255,255,.17);border-radius:12px;padding:30px 18px;background:var(--panel);display:grid;justify-items:center;gap:7px;text-align:center;transition:border-color .15s,background .15s}
+.drop.over{border-color:var(--accent);background:var(--accent-dim)}
+.drop > .ic{width:26px;height:26px;color:var(--accent-ink)}
+.drop b{font-size:14px;font-weight:600}
+.drop span{font-size:12px;color:var(--muted);letter-spacing:.02em}
+.drop .btn{margin-top:7px}
+.formerr{display:flex;gap:9px;align-items:flex-start;margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--high-bg);border:1px solid var(--high-line);color:#f6b4b6;font-size:12.5px;line-height:1.5}
+.formerr .ic{width:15px;height:15px;margin-top:1px;color:var(--high)}
+.formerr button{color:var(--ink);text-decoration:underline;text-underline-offset:2px;font-size:12.5px}
+.field{width:100%;background:var(--bg);border:1px solid var(--line2);border-radius:8px;color:var(--ink);padding:10px 12px;font:inherit;font-size:13px;transition:border-color .15s,box-shadow .15s}
+.field::placeholder{color:var(--faint)}
+.field:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 3px rgba(201,163,91,.16)}
+textarea.field{min-height:118px;resize:vertical;font-family:var(--font-mono);font-size:12.5px;line-height:1.6}
+label.flab{display:block;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:12px 0 5px}
+.paste{margin-top:14px}
+.paste .body{margin-top:11px;display:grid;gap:9px}
+.row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+/* samples + docs */
+.samples{display:grid;grid-template-columns:repeat(auto-fill,minmax(226px,1fr));gap:11px}
+.sample{border:1px solid var(--line);border-radius:10px;padding:14px;background:var(--panel);display:grid;gap:7px;text-align:left;transition:border-color .15s,background .15s}
+.sample:hover{border-color:rgba(201,163,91,.4);background:var(--raised)}
+.sample .top{display:flex;align-items:center;gap:8px;color:var(--accent-ink)}
+.sample .top .ic{width:16px;height:16px}
+.sample .nm{font-family:var(--font-display);font-size:14.5px;letter-spacing:-.008em;color:var(--ink)}
+.sample .ds{font-size:12px;color:var(--muted);line-height:1.5}
+.sample .ft{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--faint);letter-spacing:.03em}
+.doc-row{display:flex;align-items:center;gap:12px;padding:11px 2px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.doc-row:last-child{border-bottom:0}
+.doc-row .nm{font-family:var(--font-display);font-size:14px;letter-spacing:-.005em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.doc-row .meta{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.doc-row .acts{display:flex;gap:6px;flex-wrap:wrap}
+
+/* risk */
+.rsum{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+.gauge-wrap{position:relative;width:164px;flex:none}
+.gauge{display:block;width:164px;height:auto}
+.gauge .track{fill:none;stroke:rgba(255,255,255,.09);stroke-width:8;stroke-linecap:round}
+.gauge .val{fill:none;stroke:currentColor;stroke-width:8;stroke-linecap:round;transition:stroke-dasharray .5s cubic-bezier(.2,0,0,1)}
+.v-high{color:var(--high)}.v-medium{color:var(--med)}.v-low{color:var(--low)}
+.gnum{position:absolute;left:0;right:0;bottom:2px;text-align:center;font-family:var(--font-display);font-size:33px;line-height:1;font-variant-numeric:tabular-nums}
+.gnum small{font-family:var(--font-ui);font-size:11.5px;color:var(--faint);margin-left:1px;letter-spacing:0}
+.rsum-body{flex:1;min-width:250px}
+.rsum-body .verdict{font-family:var(--font-display);font-size:21px;letter-spacing:-.015em;margin-top:6px}
+.rsum-body .hint{margin-top:4px;max-width:52ch}
+.rsum .sevrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.rsum .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin:14px 0 12px}
+.finds{display:grid;gap:11px}
+.find{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:15px 16px;display:grid;gap:10px}
+.find header{display:flex;align-items:flex-start;gap:10px}
+.find .fic{width:30px;height:30px;border-radius:8px;background:var(--raised);border:1px solid var(--line);display:grid;place-items:center;color:var(--accent-ink);flex:none}
+.find .fic .ic{width:16px;height:16px}
+.find h3{font-family:var(--font-display);font-size:15.5px;font-weight:600;letter-spacing:-.008em;line-height:1.2}
+.find .loc{font-size:11px;color:var(--faint);letter-spacing:.04em;margin-top:2px}
+.find header .sev{margin-left:auto}
+.excerpt{font-family:var(--font-mono);font-size:12.5px;line-height:1.65;color:var(--body);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow-wrap:anywhere;white-space:pre-wrap}
+.excerpt mark{background:rgba(224,163,62,.2);color:var(--ink);border-radius:3px;padding:0 2px;box-shadow:inset 0 -1px 0 rgba(224,163,62,.55)}
+.excerpt del{color:#f3a2a5;text-decoration-thickness:1px;background:rgba(229,72,77,.1);border-radius:2px}
+.excerpt ins{text-decoration:none;color:#93dfa0;background:rgba(76,174,92,.12);border-radius:2px;padding:0 2px}
+.find .why{font-size:12.5px;color:var(--muted);line-height:1.55}
+.find footer{display:flex;gap:7px;flex-wrap:wrap}
+.rtag{color:var(--accent-ink);background:var(--accent-dim);border-radius:3px;padding:0 3px;white-space:nowrap}
+.rsum-note{font-size:11.5px;color:var(--faint);margin-top:9px}
+
+/* scan */
+.scan{display:grid;gap:0}
+.scan .lines{position:relative;height:112px;margin-top:13px;border:1px solid var(--line);border-radius:8px;background:var(--bg);overflow:hidden}
+.scan .lines::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 8px)}
+.scan .beam{position:absolute;left:0;right:0;top:-24%;height:26%;background:linear-gradient(180deg,transparent,rgba(201,163,91,.16),rgba(201,163,91,.3),transparent);animation:sweep 1.15s linear infinite}
+@keyframes sweep{to{top:104%}}
+.scan-steps{display:grid;gap:7px;margin-top:13px;list-style:none;padding:0;font-size:12.5px;color:var(--muted)}
+.scan-steps li{display:flex;align-items:center;gap:8px}
+.scan-steps li .ic{width:14px;height:14px;color:var(--faint)}
+.scan-steps li.done{color:var(--body)}
+.scan-steps li.done .ic{color:var(--low)}
+.scan-steps li.now{color:var(--accent-ink)}
+.scan-steps li.now .ic{color:var(--accent);animation:pulse 1.1s ease-in-out infinite}
+
+/* redlines */
+.rl{display:grid;gap:9px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:15px 16px}
+.rl header{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.rl h3{font-family:var(--font-display);font-size:15px;letter-spacing:-.008em}
+.rl .pair{display:grid;gap:7px}
+.rl .pair .lbl{font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.rl .prop{font-size:12.5px;color:var(--body);line-height:1.6;background:rgba(76,174,92,.05);border:1px solid rgba(76,174,92,.18);border-radius:8px;padding:10px 12px}
+.rl footer{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.rl.adopted{border-color:rgba(76,174,92,.34)}
+.rl .adopt{color:var(--low);border-color:rgba(76,174,92,.3)}
+.rl .adopt[aria-pressed="true"]{background:var(--low-bg);border-color:rgba(76,174,92,.45)}
+
+/* timeline */
+.tlfilters{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.when{font-family:var(--font-mono);font-size:11.5px;color:var(--body);white-space:nowrap}
+.evidence{max-width:420px}
+
+/* security */
+.tgls{display:grid;gap:7px;margin-top:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.tgl{display:flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid var(--line);border-radius:8px;cursor:pointer;background:var(--panel);min-height:40px}
+.tgl:hover{background:var(--raised)}
+.tgl input{position:absolute;opacity:0;width:1px;height:1px}
+.tgl .sw{width:30px;height:17px;border-radius:999px;background:var(--hover);position:relative;flex:none;transition:background .15s}
+.tgl .sw::after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:var(--faint);transition:left .15s,background .15s}
+.tgl input:checked + .sw{background:var(--accent)}
+.tgl input:checked + .sw::after{left:15px;background:#171106}
+.tgl input:focus-visible + .sw{outline:2px solid var(--accent);outline-offset:2px}
+.tgl .nm{font-size:12.5px;color:var(--body);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tgl .ct{margin-left:auto;font-size:11px;color:var(--faint);font-variant-numeric:tabular-nums}
+.scrub-stat{display:flex;gap:14px;flex-wrap:wrap;margin:11px 0 8px;font-size:11.5px;color:var(--muted)}
+.scrub-stat b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.scrub-prev{max-height:210px;overflow:auto}
+.guard{display:grid;gap:10px;margin-top:10px}
+.guard .g{display:flex;gap:9px;align-items:flex-start;font-size:12px;color:var(--muted);line-height:1.5}
+.guard .g .ic{width:15px;height:15px;color:var(--accent-ink);margin-top:1px}
+.guard .g b{color:var(--body);font-weight:600}
+
+/* empty / steps */
+.empty{border:1px dashed rgba(255,255,255,.15);border-radius:12px;padding:34px 20px;display:grid;justify-items:center;gap:8px;text-align:center;color:var(--muted)}
+.empty .ic{width:24px;height:24px;color:var(--faint)}
+.empty h3{font-family:var(--font-display);font-size:16.5px;color:var(--ink);font-weight:600;letter-spacing:-.01em}
+.empty p{font-size:12.5px;max-width:46ch;line-height:1.55}
+.empty .btn{margin-top:5px}
+.steps-line{list-style:none;padding:0;margin-top:11px;display:grid;gap:9px;counter-reset:s}
+.steps-line li{display:flex;gap:10px;align-items:flex-start;counter-increment:s;font-size:12.5px;color:var(--muted);line-height:1.5}
+.steps-line li::before{content:counter(s);font-family:var(--font-display);font-size:13px;color:var(--accent-ink);width:22px;height:22px;border:1px solid rgba(201,163,91,.3);border-radius:50%;display:grid;place-items:center;flex:none;margin-top:1px}
+.steps-line li.done{color:var(--body)}
+.steps-line li.done::before{content:'✓';background:var(--accent-dim);color:var(--accent-ink);font-family:var(--font-ui);font-size:11px}
+.steps-line b{color:var(--ink);font-weight:600;display:block;font-size:12.5px}
+.privacy ul{list-style:none;padding:0;margin-top:10px;display:grid;gap:7px;font-size:12px;color:var(--muted)}
+.privacy li{display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+.privacy li .ic{width:14px;height:14px;color:var(--low);margin-top:1px}
+
+/* toasts */
+.toasts{position:fixed;right:18px;bottom:18px;display:grid;gap:8px;z-index:60;max-width:calc(100vw - 36px)}
+.toast{display:flex;align-items:center;gap:9px;background:var(--raised);border:1px solid var(--line2);border-radius:10px;padding:10px 14px;font-size:12.5px;color:var(--ink);box-shadow:0 10px 30px rgba(0,0,0,.45);animation:toastIn .2s cubic-bezier(.2,0,0,1);transition:opacity .25s}
+.toast .ic{width:15px;height:15px;color:var(--low)}
+.toast.err{border-color:var(--high-line)}
+.toast.err .ic{color:var(--high)}
+.toast.out{opacity:0}
+@keyframes toastIn{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.backdrop{display:none}
+
+@media (max-width:1080px){
+  .dash-grid{grid-template-columns:1fr}
+  .two{grid-template-columns:1fr}
+}
+@media (max-width:1020px){
+  .sidebar{transform:translateX(-103%);transition:transform .24s cubic-bezier(.2,0,0,1)}
+  .sidebar.open{transform:none}
+  .maincol{margin-left:0}
+  #menuBtn{display:inline-flex}
+  .backdrop{display:block;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:35;opacity:0;pointer-events:none;transition:opacity .2s}
+  .backdrop.on{opacity:1;pointer-events:auto}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:680px){
+  main{padding:18px 14px 60px}
+  .topbar{padding:0 12px;gap:8px}
+  .topbar .title{max-width:26vw}
+  .topbar .badge{display:none}
+  .topbar .badge.keep{display:inline-flex;padding:4px 8px}
+  .topbar .badge .t-full{display:none}
+  .topbar .badge .t-short{display:inline}
+  #docChipName{max-width:100px}
+  .hero h1{font-size:clamp(27px,8vw,34px)}
+  .kpis{grid-template-columns:1fr 1fr;gap:10px}
+  .kpi .val{font-size:26px}
+  .rsum{gap:16px}
+  .panel{padding:15px}
+  .doc-row .nm{flex-basis:100%}
+  .find{padding:13px}
+  .tbl{min-width:460px}
+}
+@media (max-width:640px){
+  #tlWrap .tbl thead{display:none}
+  #tlWrap .tbl,#tlWrap .tbl tbody,#tlWrap .tbl tr,#tlWrap .tbl td{display:block;min-width:0;width:auto}
+  #tlWrap .tbl tr{border-bottom:1px solid var(--line);padding:11px 0}
+  #tlWrap .tbl td{border:0;padding:2px 0}
+  #tlWrap td.when{font-size:11px;color:var(--faint);margin-bottom:2px}
+  #tlWrap td.when::before{content:'When · '}
+  #tlWrap .tbl .evd{max-width:none;margin-top:4px}
+}
+@media (max-width:430px){.kpis{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+  .view.on{animation:none}
+  .scan .beam{display:none}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4v15M8 19h8M12 6l-6 2m6-2 6 2M4.4 13l2-5 2 5a2.5 2.5 0 0 1-4 0zM15.6 13l2-5 2 5a2.5 2.5 0 0 1-4 0z"/></symbol>
+    <symbol id="i-gauge" viewBox="0 0 24 24"><path d="M4 18a8.5 8.5 0 1 1 16 0"/><path d="M12 14l3.4-3.4"/><circle cx="12" cy="15" r="1.4"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 17h6"/></symbol>
+    <symbol id="i-files" viewBox="0 0 24 24"><path d="M8 3h7l4 4v11H8z"/><path d="M16 3v4h4M5 7v14h11"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.6-3 8-7 10-4-2-7-5.4-7-10V6z"/><path d="M9.4 11.6l1.9 1.9 3.4-3.5"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l4-1L20.5 6.5l-3-3L5 16z"/><path d="M14.5 6.5l3 3M4 20l1-4"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9.5" rx="2"/><path d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5"/><path d="M12 14v2.6"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V5m-4 4 4-4 4 4"/><path d="M5 19h14"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m-4-4 4 4 4-4"/><path d="M5 19h14"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M4.5 12.5l5 5 10-11"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9.5 7V5h5v2M6.5 7l1 13h9l1-13"/><path d="M10 11v5.5M14 11v5.5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l8.5 15h-17z"/><path d="M12 10v4M12 17v.4"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.7-5.6M20 12a8 8 0 0 1-13.7 5.6"/><path d="M18 3v4h-4M6 21v-4h4"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8.5V5h3.5M20 8.5V5h-3.5M4 15.5V19h3.5M20 15.5V19h-3.5"/><path d="M4 12h16"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10.5h18M6.5 15h4"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9.5 18h5M10.5 21h3"/><path d="M12 3a6 6 0 0 1 3.6 10.8c-.7.6-1.1 1.3-1.1 2.2H9.5c0-.9-.4-1.6-1.1-2.2A6 6 0 0 1 12 3z"/></symbol>
+    <symbol id="i-briefcase" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></symbol>
+    <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7.5" ry="3"/><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/></symbol>
+    <symbol id="i-exit" viewBox="0 0 24 24"><path d="M14 4h4.5v16H14"/><path d="M10.5 8.5L6 12l4.5 3.5M6 12h9"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10-6.5z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+  </defs>
+</svg>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar" data-od-id="sidebar" aria-label="Primary">
+    <div class="brand">
+      <span class="mark"><svg class="ic"><use href="#i-scale"/></svg></span>
+      <div>
+        <div class="word">AutoClaw</div>
+        <div class="sub">Legal Shield</div>
+      </div>
+    </div>
+    <nav class="nav" id="nav">
+      <a href="#/dashboard" data-nav="dashboard"><svg class="ic"><use href="#i-gauge"/></svg>Dashboard</a>
+      <a href="#/documents" data-nav="documents"><svg class="ic"><use href="#i-files"/></svg>Matter files</a>
+      <a href="#/risk" data-nav="risk"><svg class="ic"><use href="#i-shield"/></svg>Risk matrix</a>
+      <a href="#/redlines" data-nav="redlines"><svg class="ic"><use href="#i-pen"/></svg>Redlines</a>
+      <a href="#/timeline" data-nav="timeline"><svg class="ic"><use href="#i-clock"/></svg>Fact timeline</a>
+      <a href="#/security" data-nav="security"><svg class="ic"><use href="#i-lock"/></svg>Security guardrails</a>
+    </nav>
+    <div class="sidefoot">
+      <span class="badge ok"><svg class="ic"><use href="#i-shield"/></svg>Zero-data retention</span>
+      <span>Session memory only. Nothing leaves this tab.</span>
+      <button type="button" data-action="reset">Reset session</button>
+      <span>Demo build 1.0 · sample data is illustrative</span>
+    </div>
+  </aside>
+  <div class="backdrop" id="backdrop"></div>
+
+  <div class="maincol">
+    <header class="topbar" data-od-id="topbar">
+      <button class="icon-btn" id="menuBtn" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><svg class="ic"><use href="#i-menu"/></svg></button>
+      <span class="title" id="viewTitle">Dashboard</span>
+      <span class="spacer"></span>
+      <button class="chip" id="docChip" hidden><span class="dot" id="docChipDot"></span><span id="docChipName"></span></button>
+      <span class="badge keep ok"><svg class="ic"><use href="#i-lock"/></svg><span class="t-full">Zero-data retention</span><span class="t-short">No data kept</span></span>
+      <span class="badge"><svg class="ic"><use href="#i-shield"/></svg>Local processing</span>
+    </header>
+
+    <main id="main">
+      <!-- Dashboard -->
+      <section class="view" data-view="dashboard" data-od-id="view-dashboard" aria-labelledby="dashH">
+        <div class="hero" data-od-id="hero">
+          <p class="eyebrow"><span class="rule"></span>Counsel desk · local session</p>
+          <h1 id="dashH">Every clause weighed.<br>Every risk on record.</h1>
+          <p class="lede">Contract review, redline drafting and fact indexing that run entirely in this tab. Add an agreement to open its matter file — no upload, no retention, no network.</p>
+          <div class="hero-actions">
+            <button class="btn primary" data-action="go-docs"><svg class="ic"><use href="#i-plus"/></svg>Add a contract</button>
+            <button class="btn" data-action="demo-nda"><svg class="ic"><use href="#i-play"/></svg>Try a sample NDA</button>
+            <span class="badge ok"><svg class="ic"><use href="#i-shield"/></svg>PII redacted before analysis</span>
+          </div>
+        </div>
+
+        <div class="kpis" data-od-id="kpis">
+          <div class="kpi"><div class="lab"><svg class="ic"><use href="#i-file"/></svg>Contracts analyzed</div><div class="val" id="kpiAnalyzed">0</div><div class="sub" id="kpiAnalyzedSub">No contracts yet</div></div>
+          <div class="kpi"><div class="lab"><svg class="ic"><use href="#i-gauge"/></svg>Latest risk score</div><div class="val"><span id="kpiScore">—</span><small id="kpiScoreOf">/100</small></div><div class="sub" id="kpiScoreSub">Awaiting analysis</div></div>
+          <div class="kpi"><div class="lab"><svg class="ic"><use href="#i-pen"/></svg>Redlines generated</div><div class="val" id="kpiRedlines">0</div><div class="sub" id="kpiRedlinesSub">Counter-proposals drafted</div></div>
+          <div class="kpi"><div class="lab"><svg class="ic"><use href="#i-lock"/></svg>PII items scrubbed</div><div class="val" id="kpiPii">0</div><div class="sub" id="kpiPiiSub">Redacted before processing</div></div>
+        </div>
+
+        <div class="dash-grid">
+          <div class="stack">
+            <section class="panel" data-od-id="risk-profile">
+              <header class="ph"><div><h2>Risk profile</h2><p class="hint" id="chartHint">Clause families flagged in the latest analysis.</p></div></header>
+              <div id="catChart"></div>
+            </section>
+            <section class="panel" data-od-id="recent-files">
+              <header class="ph"><div><h2>Matter files</h2></div><a class="link" href="#/documents">View all</a></header>
+              <div id="recentWrap"></div>
+            </section>
+          </div>
+          <div class="stack">
+            <section class="panel" data-od-id="next-steps">
+              <h2>First matter, three passes</h2>
+              <p class="hint">The review sequence, kept in order.</p>
+              <ol id="stepsCard" class="steps-line"></ol>
+            </section>
+            <section class="panel privacy" data-od-id="privacy-card">
+              <span class="badge ok"><svg class="ic"><use href="#i-lock"/></svg>Zero-data retention</span>
+              <ul>
+                <li><svg class="ic"><use href="#i-check"/></svg>Everything runs in this tab — no servers, no CDNs, no telemetry.</li>
+                <li><svg class="ic"><use href="#i-check"/></svg>State lives in memory and clears when the tab closes.</li>
+                <li><svg class="ic"><use href="#i-check"/></svg>Every rendered string is HTML-escaped; uploads never execute.</li>
+              </ul>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <!-- Documents -->
+      <section class="view" data-view="documents" data-od-id="view-documents" aria-labelledby="docsH">
+        <div class="vh">
+          <p class="eyebrow"><span class="rule"></span>Matter files</p>
+          <h1 id="docsH">Document intake</h1>
+          <p class="lede">Drop a PDF, DOCX or TXT — or open an illustrative sample. Formats are validated before reading and nothing is uploaded.</p>
+        </div>
+        <div class="two">
+          <section class="panel">
+            <div class="drop" id="drop" role="button" tabindex="0" aria-describedby="dropHint">
+              <svg class="ic"><use href="#i-upload"/></svg>
+              <b>Drop a contract here</b>
+              <span id="dropHint">PDF · DOCX · TXT · up to 10 MB</span>
+              <button class="btn" type="button" data-action="pick-file">Choose file</button>
+            </div>
+            <div id="upErr"></div>
+            <div class="paste">
+              <button class="btn quiet" id="pasteToggle" aria-expanded="false" aria-controls="pastePanel">Paste contract text instead</button>
+              <div class="body" id="pastePanel" hidden>
+                <div><label class="flab" for="pasteName">Matter label</label><input class="field" id="pasteName" placeholder="e.g. Acme vendor MSA" autocomplete="off"></div>
+                <div><label class="flab" for="pasteText">Contract text</label><textarea class="field" id="pasteText" placeholder="Paste the agreement text — parties, clauses, dates."></textarea></div>
+                <div id="pasteErr"></div>
+                <div class="row-actions"><button class="btn primary" type="button" id="pasteSubmit"><svg class="ic"><use href="#i-scan"/></svg>Analyze pasted text</button></div>
+              </div>
+            </div>
+          </section>
+          <section class="panel" data-od-id="guardrails">
+            <h2>Session guardrails</h2>
+            <p class="hint">Constraints enforced before any text is read.</p>
+            <div class="guard">
+              <div class="g"><svg class="ic"><use href="#i-check"/></svg><span><b>Formats:</b> .pdf, .docx, .txt only. Binary payloads are never executed.</span></div>
+              <div class="g"><svg class="ic"><use href="#i-check"/></svg><span><b>Size cap:</b> 10 MB per file, checked on selection.</span></div>
+              <div class="g"><svg class="ic"><use href="#i-check"/></svg><span><b>Escaping:</b> every string is rendered as text, never as markup.</span></div>
+              <div class="g"><svg class="ic"><use href="#i-check"/></svg><span><b>Network:</b> zero requests — no fonts, scripts or analytics.</span></div>
+            </div>
+          </section>
+        </div>
+        <section class="panel" data-od-id="matter-list" style="margin-bottom:14px">
+          <header class="ph"><div><h2>Matter file</h2><p class="hint" id="docCount">Nothing here yet.</p></div></header>
+          <div id="docList"></div>
+        </section>
+        <section class="panel" data-od-id="samples">
+          <header class="ph"><div><h2>Sample agreements</h2><p class="hint">Illustrative templates written for this demo — not real agreements.</p></div></header>
+          <div id="sampleGrid" class="samples"></div>
+        </section>
+      </section>
+
+      <!-- Risk -->
+      <section class="view" data-view="risk" data-od-id="view-risk" aria-labelledby="riskH">
+        <div class="vh">
+          <p class="eyebrow"><span class="rule"></span>Risk matrix</p>
+          <h1 id="riskH">Clause analysis</h1>
+          <p class="lede" id="riskMeta">Open a matter file to scan its clauses against the review playbook.</p>
+        </div>
+        <div id="riskSummary"></div>
+        <div id="sevFilters"></div>
+        <div id="findings"></div>
+      </section>
+
+      <!-- Redlines -->
+      <section class="view" data-view="redlines" data-od-id="view-redlines" aria-labelledby="rlH">
+        <div class="vh">
+          <p class="eyebrow"><span class="rule"></span>Redline generator</p>
+          <h1 id="rlH">Counter-proposals</h1>
+          <p class="lede" id="rlMeta">Draft balanced replacement language for each flagged clause, then export the memo.</p>
+        </div>
+        <div class="panel" style="margin-bottom:14px">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <div style="flex:1;min-width:200px"><div id="rlCount" class="hint" style="margin:0">No proposals yet.</div></div>
+            <div class="row-actions" style="margin:0">
+              <button class="btn primary" data-action="redline-all"><svg class="ic"><use href="#i-pen"/></svg>Generate all</button>
+              <button class="btn" data-action="copy-memo"><svg class="ic"><use href="#i-copy"/></svg>Copy memo</button>
+              <button class="btn" data-action="download-memo"><svg class="ic"><use href="#i-download"/></svg>Download</button>
+            </div>
+          </div>
+        </div>
+        <div id="rlList"></div>
+      </section>
+
+      <!-- Timeline -->
+      <section class="view" data-view="timeline" data-od-id="view-timeline" aria-labelledby="tlH">
+        <div class="vh">
+          <p class="eyebrow"><span class="rule"></span>Fact timeline</p>
+          <h1 id="tlH">Evidence index</h1>
+          <p class="lede" id="tlMeta">Dates, parties, obligations and milestones extracted into one chronological record.</p>
+        </div>
+        <div class="panel">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+            <div id="tlCount" class="hint" style="margin:0;flex:1;min-width:180px">No facts indexed yet.</div>
+            <div class="row-actions" style="margin:0">
+              <button class="btn" data-action="copy-table"><svg class="ic"><use href="#i-copy"/></svg>Copy table</button>
+              <button class="btn primary" data-action="export-csv"><svg class="ic"><use href="#i-download"/></svg>Export CSV</button>
+            </div>
+          </div>
+          <div id="tlFilters" class="tlfilters"></div>
+          <div id="tlWrap"></div>
+        </div>
+      </section>
+
+      <!-- Security -->
+      <section class="view" data-view="security" data-od-id="view-security" aria-labelledby="secH">
+        <div class="vh">
+          <p class="eyebrow"><span class="rule"></span>Security guardrails</p>
+          <h1 id="secH">Scrub before processing</h1>
+          <p class="lede">Redact identities, money and trade-secret markers on a working copy — then analyze the scrubbed text instead of the original.</p>
+        </div>
+        <div class="two">
+          <section class="panel">
+            <header class="ph"><div><h2>Redaction bench</h2><p class="hint">Toggles apply live to the working copy.</p></div></header>
+            <div class="row-actions" style="margin:0 0 10px">
+              <button class="btn sm" data-action="load-active">Load active contract</button>
+              <button class="btn sm" data-action="load-nda">Load sample NDA</button>
+            </div>
+            <label class="sr-only" for="scrubText">Contract text to scrub</label>
+            <textarea class="field" id="scrubText" placeholder="Paste contract text, or load the active contract above."></textarea>
+            <div id="scrubToggles" class="tgls"></div>
+            <div class="scrub-stat" id="scrubStat"></div>
+            <div class="excerpt scrub-prev" id="scrubPreview" aria-live="polite"></div>
+            <div id="scrubErr"></div>
+            <div class="row-actions">
+              <button class="btn primary" id="scrubAnalyze"><svg class="ic"><use href="#i-scan"/></svg>Analyze scrubbed text</button>
+              <button class="btn" id="scrubCopy"><svg class="ic"><use href="#i-copy"/></svg>Copy scrubbed</button>
+            </div>
+          </section>
+          <div class="stack">
+            <section class="panel" data-od-id="input-guardrails">
+              <h2>Input guardrails</h2>
+              <div class="guard">
+                <div class="g"><svg class="ic"><use href="#i-file"/></svg><span><b>Accepted:</b> .pdf, .docx, .txt — other extensions are rejected before reading.</span></div>
+                <div class="g"><svg class="ic"><use href="#i-lock"/></svg><span><b>10 MB ceiling:</b> oversized files stop with a recovery path, never a silent failure.</span></div>
+                <div class="g"><svg class="ic"><use href="#i-eye"/></svg><span><b>Sanitized rendering:</b> uploaded text is escaped before it reaches the DOM.</span></div>
+                <div class="g"><svg class="ic"><use href="#i-refresh"/></svg><span><b>Recovery:</b> parse failures preserve your input and offer paste-instead and retry.</span></div>
+              </div>
+            </section>
+            <section class="panel privacy">
+              <span class="badge ok"><svg class="ic"><use href="#i-shield"/></svg>Zero-data retention</span>
+              <h2 style="margin-top:11px">Privacy by architecture</h2>
+              <ul>
+                <li><svg class="ic"><use href="#i-check"/></svg>No network calls: no CDN scripts, remote fonts or analytics.</li>
+                <li><svg class="ic"><use href="#i-check"/></svg>Nothing is persisted — closing the tab clears the session.</li>
+                <li><svg class="ic"><use href="#i-check"/></svg>Exports are user-initiated downloads only.</li>
+              </ul>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+<input type="file" id="fileInput" accept=".pdf,.docx,.txt" hidden>
+
+<script>
+'use strict';
+/* ---------- helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const icon = (n, cls = '') => '<svg class="ic ' + cls + '" aria-hidden="true"><use href="#i-' + n + '"/></svg>';
+const uid = () => Math.random().toString(36).slice(2, 9);
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const MAX_FILE = 10 * 1024 * 1024;
+const MAX_CHARS = 200000;
+const SEV_W = { low: 2, medium: 5, high: 12 };
+const SEV_LABEL = { low: 'Low', medium: 'Medium', high: 'High' };
+const SEV_ORDER = { high: 0, medium: 1, low: 2 };
+const TYPE_ORDER = { Milestone: 0, Obligation: 1, Financial: 2, Party: 3, Date: 4 };
+const SLUG = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 42) || 'matter';
+const trim = (s, n) => (s.length > n ? s.slice(0, n - 1).trimEnd() + '…' : s);
+const fmtSize = b => b < 1024 ? b + ' B' : b < 1048576 ? Math.round(b / 1024) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
+const fmtWhen = t => isNaN(t) ? '—' : new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+/* ---------- samples ---------- */
+const SAMPLES = [
+  {
+    name: 'Helios–Northgate Mutual NDA', kind: 'NDA', icon: 'lock',
+    desc: 'Two-party NDA with perpetual confidentiality, uncapped indemnity and a broad invention assignment.',
+    text: 'MUTUAL NON-DISCLOSURE AGREEMENT\n\nThis Mutual Non-Disclosure Agreement is entered into as of January 12, 2026, between Helios Robotics, Inc., a Delaware corporation, and Northgate Ventures, LLC, a New York limited liability company (each a "Party").\n\n1. Confidential Information. Each Party may disclose trade secrets, proprietary technology and confidential information relating to product roadmaps, pricing and customer lists.\n\n2. Obligations. The Receiving Party shall protect all Confidential Information and shall not disclose it to any third party without prior written consent. Confidentiality obligations shall survive in perpetuity.\n\n3. Indemnity. The Receiving Party shall indemnify and hold harmless the Disclosing Party against any and all claims, damages and losses arising from this Agreement, without limitation.\n\n4. Residuals. The Receiving Party assigns all right, title and interest in and to any inventions, improvements or ideas, whether or not developed during the Term, that relate to the Disclosing Party\'s business.\n\n5. Term & Termination. This Agreement commences on the Effective Date and continues for two (2) years. It automatically renews for successive one-year periods unless either Party gives written notice sixty (60) days prior to the renewal date. Disclosing Party may terminate this Agreement at any time, for any reason, at its sole discretion, upon fourteen (14) days\' written notice.\n\n6. Governing Law. This Agreement is governed by the laws of the State of Delaware, and the parties consent to the exclusive jurisdiction of the courts of Wilmington, Delaware. Late payments of unreimbursed expenses accrue interest at 1.5% per month.'
+  },
+  {
+    name: 'Stellar Dynamics Employment Agreement', kind: 'Employment', icon: 'briefcase',
+    desc: 'Executive offer with a 24-month nationwide non-compete, broad IP assignment and at-will termination.',
+    text: 'EMPLOYMENT AGREEMENT\n\nThis Employment Agreement is made effective March 2, 2026, between Stellar Dynamics Corp. (the "Company") and Jordan Avery (the "Executive").\n\n1. Position & Compensation. The Company shall pay the Executive an annual salary of $185,000, payable semi-monthly, plus a target bonus of up to 15% of base salary. The Company shall provide health benefits effective the Start Date.\n\n2. At-Will Employment. Either party may terminate the employment relationship at any time. The Company may terminate the Executive immediately for Cause at its sole discretion.\n\n3. Intellectual Property. The Executive assigns all inventions, works of authorship and developments, whether or not created during working hours or with Company equipment, that relate to the Company\'s actual or anticipated business, and agrees such assignments are perpetual and irrevocable.\n\n4. Non-Competition. For twenty-four (24) months following termination, the Executive shall not engage in any business that competes with the Company anywhere in the United States.\n\n5. Confidentiality. The Executive shall hold all proprietary information in confidence in perpetuity.\n\n6. Governing Law. This Agreement is governed by the laws of the State of California. Severance of $20,000 shall be payable within thirty (30) days of a qualifying termination.'
+  },
+  {
+    name: 'Vertex Cloud SaaS Subscription', kind: 'SaaS', icon: 'db',
+    desc: 'Vendor-favourable subscription: AS-IS warranty, 3-month liability cap, auto-renewal and unilateral fee increases.',
+    text: 'SAAS SUBSCRIPTION AGREEMENT\n\nThis SaaS Subscription Agreement is entered into as of April 3, 2026 by and between Vertex Cloud Platforms, Inc. ("Vertex") and Cascade Retail Group, Inc. ("Customer").\n\n1. Services. Vertex shall provide the Vertex Analytics Platform with a monthly uptime commitment of 99.9%, measured monthly.\n\n2. Fees. Customer shall pay subscription fees of $4,800 per month. Fees will increase by up to eight percent (8%) upon each renewal. Late payments accrue interest at 1.5% per month or the maximum rate permitted by law.\n\n3. Warranty Disclaimer. The Services are provided AS-IS and AS-AVAILABLE. Vertex disclaims all other warranties, express or implied.\n\n4. Limitation of Liability. In no event shall Vertex be liable for any indirect, incidental, or consequential damages, and Vertex\'s total liability shall not exceed the fees paid in the three (3) months preceding the claim.\n\n5. Customer Indemnity. Customer shall defend and indemnify Vertex against any and all third-party claims arising from Customer Data or Customer\'s use of the Services.\n\n6. Term & Renewal. The initial term is twelve (12) months beginning May 1, 2026, and automatically renews for successive twelve-month terms unless Customer gives notice of non-renewal at least sixty (60) days before renewal.\n\n7. Governing Law. This Agreement is governed by the laws of the State of New York, with exclusive venue in the courts of New York County.'
+  },
+  {
+    name: 'Meridian–Atlas Vendor SLA', kind: 'Vendor SLA', icon: 'card',
+    desc: 'Logistics master services agreement with daily service credits, unilateral convenience termination and German venue.',
+    text: 'MASTER SERVICES AGREEMENT (VENDOR SLA)\n\nThis Master Services Agreement is made as of July 1, 2026 between Meridian Logistics GmbH ("Vendor") and Atlas Manufacturing Corp. ("Client").\n\n1. Services. Vendor shall deliver consolidated freight reports every Thursday by 17:00 CET and shall maintain on-time delivery of at least 96% of shipments.\n\n2. Service Levels. If on-time delivery falls below target, Vendor shall pay Client service credits of $2,500 per day of delay, capped at ten percent (10%) of the annual fees.\n\n3. Fees. Client shall pay Vendor $48,000 per month, invoiced on the first business day of each month.\n\n4. Termination. Meridian may terminate this Agreement for convenience upon fifteen (15) days\' written notice; the Agreement terminates immediately upon either party\'s insolvency.\n\n5. Indemnity. Vendor shall indemnify and hold harmless Client against any and all third-party claims, damages, and regulatory fines arising from Vendor\'s performance, without limitation.\n\n6. Data & Confidentiality. Vendor shall process personal data under the GDPR and protect Client\'s trade secrets and know-how for as long as the information remains confidential, and in any event in perpetuity.\n\n7. Governing Law. This Agreement is governed by German law, and the courts of Munich, Germany shall have exclusive jurisdiction.'
+  }
+];
+
+/* ---------- review playbook ---------- */
+const RULES = [
+  {
+    id: 'indemnity', label: 'Indemnity', icon: 'shield', base: 1,
+    pats: [/indemnif/i, /hold(?:\s+and)?\s+harmless/i, /\bindemnity\b/i],
+    elev: [/any\s+and\s+all/i, /without\s+limitation/i, /\bunlimited\b/i, /on\s+demand/i],
+    why: 'Uncapped, one-sided indemnity can expose the client to open-ended third-party claims.',
+    risky: /any\s+and\s+all\s+(?:third-party\s+)?(?:claims|damages|losses|liabilit\w+)/i,
+    swap: 'those third-party claims finally adjudicated to arise from the indemnifying party’s gross negligence or willful misconduct',
+    rewrite: 'Make indemnity mutual and limited to third-party claims finally adjudicated as arising from the indemnifying party’s gross negligence or willful misconduct. Carve-outs for confidentiality and IP infringement sit above the cap; everything else stays subject to it.'
+  },
+  {
+    id: 'lol', label: 'Limitation of liability', icon: 'scale', base: 1,
+    pats: [/limitation of liability/i, /consequential damages/i, /in no event shall/i, /AS-IS/i, /disclaims? all warranties/i],
+    elev: [/consequential/i, /AS-IS/i, /three\s*\(\s*3\s*\)\s*months|preceding/i, /exclud/i],
+    why: 'A three-month fee cap plus an AS-IS disclaimer leaves almost no recovery when the service fails.',
+    risky: /(?:in no event shall [a-z'. ]+ be liable for any indirect, incidental, or consequential damages|total liability shall not exceed [^,.]+)/i,
+    swap: 'twelve (12) months of fees paid, with carve-outs for confidentiality, IP infringement, data-protection breaches and gross negligence',
+    rewrite: 'Keep the mutual exclusion of indirect and consequential damages, but raise the cap to 12 months of fees and carve out confidentiality breaches, IP infringement, data-protection failures and gross negligence.'
+  },
+  {
+    id: 'termination', label: 'Termination', icon: 'exit', base: 1,
+    pats: [/terminat/i],
+    elev: [/sole discretion/i, /for convenience/i, /\bimmediately\b/i, /for any reason/i, /fourteen\s*\(\s*14\s*\)|fifteen\s*\(\s*15\s*\)/i],
+    why: 'Termination runs one way and can be exercised on short notice or at sole discretion.',
+    risky: /(?:at any time,? for any reason,? at its sole discretion|immediately for cause at its sole discretion|immediately upon|for convenience|upon fourteen \(14\) days' written notice|upon fifteen \(15\) days' written notice)/i,
+    swap: 'upon ninety (90) days’ written notice by either party, with a thirty (30) day cure period for material breach',
+    rewrite: 'Termination for material breach should require written notice and a 30-day cure period. Any convenience termination should be mutual with 90 days’ notice, plus defined wind-down and refund obligations.'
+  },
+  {
+    id: 'gov', label: 'Governing law', icon: 'scale', base: 1,
+    pats: [/governing law/i, /governed by/i, /jurisdiction/i, /\bvenue\b/i],
+    elev: [/exclusive/i],
+    why: 'Exclusive venue in the counterparty’s home forum adds cost and a home-court advantage.',
+    risky: /(?:consent to the exclusive jurisdiction of the courts of [^,.]+|exclusive venue in the courts of [^,.]+|shall have exclusive jurisdiction)/i,
+    swap: 'the non-exclusive jurisdiction of the courts of [neutral venue]',
+    rewrite: 'Propose a neutral governing law and non-exclusive jurisdiction, or arbitration seated in a neutral forum with a mutually agreed seat and language.'
+  },
+  {
+    id: 'ip', label: 'IP rights', icon: 'bulb', base: 1,
+    pats: [/intellectual property/i, /assigns? (?:all|any)/i, /inventions?/i, /work(?:s)? of authorship/i],
+    elev: [/whether or not/i, /perpetual and irrevocable/i, /all right, title and interest/i],
+    why: 'An assignment reaching inventions made outside the engagement — and surviving it — overreaches.',
+    risky: /(?:whether or not (?:created|developed)[^,.]*|assignments? are perpetual and irrevocable|assigns? all right, title and interest)/i,
+    swap: 'inventions created within the scope of the engagement and using the company’s confidential information, excluding prior inventions listed in Exhibit A',
+    rewrite: 'Narrow the assignment to work product developed within the scope of the engagement. Add a prior-inventions schedule and a limited licence back for background IP; delete “whether or not” language.'
+  },
+  {
+    id: 'conf', label: 'Confidentiality', icon: 'lock', base: 0,
+    pats: [/confidential/i, /non-disclosure/i],
+    need: /shall|must|will|agrees?|obligat|undertak/i,
+    elev: [/in perpetuity/i, /perpetuity/i, /forever/i],
+    why: 'Perpetual confidentiality is hard to administer and often unenforceable beyond trade secrets.',
+    whyLow: 'Confidentiality is time-limited here — verify the term and the trade-secret carve-out match your playbook.',
+    risky: /(?:in perpetuity|shall survive in perpetuity)/i,
+    swap: 'for five (5) years following termination, and for trade secrets for so long as they remain trade secrets',
+    rewrite: 'Set confidentiality at five years from termination, with trade secrets protected only while they meet the statutory definition. Add standard carve-outs for independently developed and publicly available information.'
+  },
+  {
+    id: 'renewal', label: 'Auto-renewal', icon: 'refresh', base: 0,
+    pats: [/renews?\b/i, /successive/i, /renewal term/i],
+    need: /automatically|successive\s+(?:one|twelve)|renews?\s+for|unless\s.{0,60}notice|non-renewal/i,
+    elev: [/automatically renews?/i, /unless .{0,60}notice/i],
+    why: 'Auto-renewal with a short notice window can lock the client into another full term.',
+    whyLow: 'Renewal language present but not automatic — confirm the notice window works for your side.',
+    risky: /(?:automatically renews?[^,.]*|successive (?:one|twelve)-year periods?)/i,
+    swap: 'renews only by written agreement of both parties',
+    rewrite: 'Replace evergreen renewal with renewal by mutual written agreement. If a renewal window stays, allow either party to decline on 90 days’ notice without penalty.'
+  },
+  {
+    id: 'pay', label: 'Fees & penalties', icon: 'card', base: 0,
+    pats: [/payment/i, /invoice/i, /interest at/i, /\bfees?\b/i, /service credits?/i, /\blate\b/i],
+    elev: [/1\.5% per month/i, /\d+(?:\.\d+)?% per month/i, /per day of delay/i, /increase by up to/i],
+    why: 'Compounding late interest and unilateral fee increases lift the effective cost above the headline rate.',
+    whyLow: 'Money terms present — check interest, escalation and credit mechanics against the approved rate card.',
+    risky: /(?:accrue interest at \d+(?:\.\d+)?% per month|fees will increase by up to [^,.]+|service credits of \$[\d,]+ per day)/i,
+    swap: 'late interest at the lesser of 1.0% per month or the statutory maximum, with fee increases capped at CPI on ninety (90) days’ notice',
+    rewrite: 'Cap late interest at 1% per month or the statutory maximum. Cap increases at CPI with 90 days’ notice, and make service credits the exclusive remedy for SLA misses so they are not stacked with termination rights.'
+  },
+  {
+    id: 'nc', label: 'Non-compete', icon: 'briefcase', base: 1,
+    pats: [/non-compet/i, /shall not (?:engage|solicit|compete)/i, /restrictive covenant/i],
+    elev: [/twenty-four \(24\) months/i, /any business/i, /anywhere in the/i],
+    why: 'A 24-month, nationwide ban on “any business” likely exceeds what protects a legitimate interest.',
+    risky: /(?:for twenty-four \(24\) months following termination|not engage in any business that competes|anywhere in the United States)/i,
+    swap: 'for twelve (12) months within the territories where the executive materially worked, limited to direct competitors',
+    rewrite: 'Shorten the restraint to 12 months, limit it to direct competitors in territories where the person actually worked, and add garden-leave or consideration where the jurisdiction requires it.'
+  },
+  {
+    id: 'data', label: 'Data & trade secrets', icon: 'db', base: 0,
+    pats: [/personal data/i, /gdpr/i, /data processing/i],
+    elev: [/in perpetuity/i, /in any event/i],
+    why: 'Open-ended protection of know-how and personal data needs defined scope, retention and deletion duties.',
+    whyLow: 'Data and trade-secret duties present — confirm scope and retention periods are defined.',
+    risky: /(?:in any event in perpetuity|for as long as the information remains confidential)/i,
+    swap: 'for three (3) years following termination, except for trade secrets protected while they qualify as such',
+    rewrite: 'Define retention, return and deletion duties with fixed periods. Scope trade-secret protection to information meeting the statutory test, and tie personal-data processing to a compliant data-processing addendum.'
+  }
+];
+const RULE_BY_ID = Object.fromEntries(RULES.map(r => [r.id, r]));
+
+/* ---------- scrub playbook ---------- */
+const SCRUB = [
+  { id: 'ssn', label: 'National IDs', tag: '[REDACTED-ID]', re: /\b\d{3}-\d{2}-\d{4}\b/g },
+  { id: 'email', label: 'Email addresses', tag: '[REDACTED-EMAIL]', re: /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g },
+  { id: 'phone', label: 'Phone numbers', tag: '[REDACTED-PHONE]', re: /(?:\+?1[-. ]?)?\(?\d{3}\)?[-. ]\d{3}[-. ]\d{4}\b/g },
+  { id: 'fin', label: 'Financial figures', tag: '[REDACTED-$]', re: /\$\s?\d[\d,]*(?:\.\d{1,2})?|\b\d+(?:\.\d+)?%\s*(?:per month|per annum|monthly|annual)?/g },
+  { id: 'name', label: 'Personal names', tag: '[REDACTED-NAME]', re: /\b(?:Mr|Mrs|Ms|Dr|Prof)\.?\s+[A-Z][a-z]+\b/g },
+  { id: 'org', label: 'Organization names', tag: '[REDACTED-ORG]', re: /\b(?:[A-Z][A-Za-z&.'-]*,?\s+){0,4}(?:Inc|LLC|Ltd|Corp|GmbH|PLC|Limited)\.?/g },
+  { id: 'secret', label: 'Trade-secret markers', tag: '[REDACTED-CONFIDENTIAL]', re: /\b(?:trade secrets?|proprietary (?:information|technology|materials?)|confidential information|know-how)\b/gi }
+];
+
+/* ---------- state ---------- */
+const state = {
+  docs: [], activeId: null, lastAnalyzedId: null, analysis: {}, redlines: {}, timelineCache: {},
+  stats: { analyzed: 0, redlines: 0, pii: 0 },
+  busy: false, scanStep: 0, sevFilter: 'all', tlFilter: 'all',
+  scrubText: '', scrubFlags: {}, scrubSource: ''
+};
+SCRUB.forEach(s => { state.scrubFlags[s.id] = true; });
+
+/* ---------- text analysis ---------- */
+function isHeading(text) {
+  const s = text.replace(/^\d+\.\s*/, '').replace(/[.;:]+$/, '').trim();
+  if (s.length < 6) return true;
+  if (!/[a-z]/.test(s)) return true;
+  const words = s.split(/\s+/);
+  if (words.length <= 6) {
+    const caps = words.filter(w => /^[A-Z0-9"“(&]/.test(w) || /^(?:of|and|the|or|to|&)$/i.test(w));
+    if (caps.length === words.length) return true;
+  }
+  return false;
+}
+
+function eachSentence(text, fn) {
+  const paras = text.split(/\n{2,}/);
+  let ord = 0;
+  paras.forEach((para) => {
+    const secM = para.match(/^\s*(\d+)\./);
+    const sec = secM ? secM[1] : '';
+    const sents = para.replace(/\s+/g, ' ').match(/[^.!?]+[.!?]+(?:["')\]]+)?|[^.!?]+$/g) || [];
+    sents.forEach(s => {
+      const t = s.trim();
+      if (t.length > 24 && !isHeading(t)) fn(t, sec, ord++);
+    });
+  });
+}
+
+function computeFindings(text) {
+  const findings = [];
+  const ruleMax = {};
+  RULES.forEach(rule => {
+    const hits = [];
+    eachSentence(text, (sent, sec, ord) => {
+      if (!rule.pats.some(rx => rx.test(sent))) return;
+      if (rule.need && !rule.need.test(sent)) return;
+      let sev = rule.base;
+      if (rule.elev.some(rx => rx.test(sent))) sev = Math.min(2, sev + 1);
+      hits.push({ sev, sent, sec, ord });
+    });
+    if (!hits.length) return;
+    hits.sort((a, b) => b.sev - a.sev || a.ord - b.ord);
+    ruleMax[rule.id] = hits[0].sev;
+    hits.slice(0, 2).forEach(h => findings.push({
+      id: rule.id + '-' + h.ord, cat: rule.id, label: rule.label, rule,
+      sev: ['low', 'medium', 'high'][h.sev], sent: h.sent, loc: h.sec ? '§' + h.sec : 'Preamble'
+    }));
+  });
+  findings.sort((a, b) => SEV_ORDER[a.sev] - SEV_ORDER[b.sev] || a.loc.localeCompare(b.loc));
+  const counts = { high: 0, medium: 0, low: 0 };
+  findings.forEach(f => counts[f.sev]++);
+  const score = Math.min(100, Object.values(ruleMax).reduce((sum, s) => sum + [2, 5, 12][s], 0));
+  return { findings, counts, score, rules: Object.keys(ruleMax).length, capped: text.length >= MAX_CHARS };
+}
+
+const verdictOf = s => s >= 60 ? { k: 'high', label: 'High exposure' } : s >= 30 ? { k: 'medium', label: 'Negotiation required' } : s > 0 ? { k: 'low', label: 'Standard watch' } : { k: 'low', label: 'Clean' };
+
+function markClause(sent, rule) {
+  const m = sent.match(rule.risky);
+  if (!m) return esc(sent);
+  const i = m.index;
+  return esc(sent.slice(0, i)) + '<mark>' + esc(m[0]) + '</mark>' + esc(sent.slice(i + m[0].length));
+}
+function redlineHtml(sent, rule) {
+  const m = sent.match(rule.risky);
+  if (!m) return '';
+  const i = m.index;
+  return esc(sent.slice(0, i)) + '<del>' + esc(m[0]) + '</del><ins>' + esc(rule.swap) + '</ins>' + esc(sent.slice(i + m[0].length));
+}
+
+/* ---------- parties / timeline ---------- */
+const DATE_SRC = '(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t|tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\\s+\\d{1,2}(?:st|nd|rd|th)?,?\\s+\\d{4}|\\b\\d{4}-\\d{2}-\\d{2}\\b|\\b\\d{1,2}\\/\\d{1,2}\\/\\d{2,4}\\b';
+const parseWhen = raw => Date.parse(raw.replace(/(\d)(st|nd|rd|th)/i, '$1'));
+
+function parties(text) {
+  const out = [];
+  const re = /\b(?:[A-Z][A-Za-z&.'-]*,?\s+){0,4}(?:Inc|LLC|Ltd|Corp|GmbH|PLC|Limited)\.?/g;
+  let m;
+  while ((m = re.exec(text)) && out.length < 6) {
+    const name = m[0].replace(/[,\s]+$/, '');
+    if (name.length > 3 && !out.some(x => x.toLowerCase() === name.toLowerCase())) out.push(name);
+  }
+  return out;
+}
+
+function buildTimeline(text) {
+  const events = [], seen = new Set();
+  const add = (raw, type, entry, evd) => {
+    const key = type + '|' + entry;
+    if (seen.has(key)) return;
+    seen.add(key);
+    events.push({ raw, type, entry, evd, t: raw ? parseWhen(raw) : NaN, order: events.length });
+  };
+  eachSentence(text, (s) => {
+    const dates = s.match(new RegExp(DATE_SRC, 'gi'));
+    if (dates) dates.forEach(d => add(d, 'Date', d, trim(s, 150)));
+    if (/no later than|deadline|due (?:date|by|on)|within \d+ (?:business )?days|effective (?:date|as of)|commenc|expir|automatically renews?|insolven|notice of non-renewal|renewal date|every (?:monday|tuesday|wednesday|thursday|friday)/i.test(s)) {
+      add(null, 'Milestone', trim(s, 120), trim(s, 170));
+    } else if (/\b(shall|must|agrees? to|agrees that|is responsible for|undertak)/i.test(s)) {
+      add(null, 'Obligation', trim(s, 120), trim(s, 170));
+    }
+  });
+  eachSentence(text, (s) => {
+    if (/\$\s?\d[\d,]*/.test(s)) add(null, 'Financial', trim(s, 120), trim(s, 170));
+  });
+  parties(text).forEach(p => {
+    const s = text.split(/\n{2,}/).find(x => x.includes(p)) || p;
+    add(null, 'Party', p, trim(s.replace(/\s+/g, ' '), 150));
+  });
+  const caps = { Date: 8, Milestone: 8, Obligation: 8, Financial: 8, Party: 6 };
+  const kept = [];
+  Object.keys(caps).forEach(t => { kept.push(...events.filter(e => e.type === t).slice(0, caps[t])); });
+  kept.sort((a, b) => {
+    const da = !isNaN(a.t), db = !isNaN(b.t);
+    if (da && db) return a.t - b.t || a.order - b.order;
+    if (da !== db) return da ? -1 : 1;
+    return (TYPE_ORDER[a.type] - TYPE_ORDER[b.type]) || a.order - b.order;
+  });
+  return kept;
+}
+
+function runScrub(text, flags) {
+  let out = text, total = 0;
+  const counts = {};
+  SCRUB.forEach(rule => {
+    counts[rule.id] = 0;
+    if (!flags[rule.id]) return;
+    out = out.replace(rule.re, () => { counts[rule.id]++; total++; return rule.tag; });
+  });
+  return { out, counts, total };
+}
+
+/* ---------- routing ---------- */
+const TITLES = { dashboard: 'Dashboard', documents: 'Matter files', risk: 'Risk matrix', redlines: 'Redlines', timeline: 'Fact timeline', security: 'Security guardrails' };
+const VIEWS = ['dashboard', 'documents', 'risk', 'redlines', 'timeline', 'security'];
+
+function currentView() {
+  const h = (location.hash || '').replace(/^#\/?/, '');
+  return VIEWS.includes(h) ? h : 'dashboard';
+}
+function go(view) {
+  if (location.hash !== '#/' + view) { location.hash = '#/' + view; return; }
+  applyRoute();
+}
+function applyRoute() {
+  const v = currentView();
+  $$('.view').forEach(s => s.classList.toggle('on', s.dataset.view === v));
+  $$('#nav a').forEach(a => a.setAttribute('aria-current', a.dataset.nav === v ? 'page' : 'false'));
+  $('#viewTitle').textContent = TITLES[v];
+  document.title = 'AutoClaw Legal Shield — ' + TITLES[v];
+  closeNav();
+  render();
+  window.scrollTo({ top: 0, behavior: REDUCED ? 'auto' : 'smooth' });
+}
+
+/* ---------- toasts ---------- */
+function toast(msg, kind = 'ok') {
+  const wrap = $('#toasts');
+  const el = document.createElement('div');
+  el.className = 'toast' + (kind === 'err' ? ' err' : '');
+  el.innerHTML = icon(kind === 'err' ? 'alert' : 'check') + '<span>' + esc(msg) + '</span>';
+  wrap.appendChild(el);
+  let timer = setTimeout(dismiss, 3600);
+  function dismiss() { el.classList.add('out'); setTimeout(() => el.remove(), 300); }
+  el.addEventListener('mouseenter', () => clearTimeout(timer));
+  el.addEventListener('mouseleave', () => { timer = setTimeout(dismiss, 2000); });
+  el.addEventListener('focusin', () => clearTimeout(timer));
+}
+
+/* ---------- clipboard / download ---------- */
+async function copyText(text) {
+  if (!text) return false;
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (_) { ok = false; }
+    ta.remove();
+    return ok;
+  }
+}
+function download(name, content, mime = 'text/plain') {
+  try {
+    const blob = new Blob([content], { type: mime + ';charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 800);
+    return true;
+  } catch (e) { toast('The download could not be started in this browser', 'err'); return false; }
+}
+
+/* ---------- docs ---------- */
+const activeDoc = () => state.docs.find(d => d.id === state.activeId) || null;
+const analysisOf = doc => doc ? state.analysis[doc.id] || null : null;
+
+function addDoc(name, text, kind) {
+  const clean = String(text || '').slice(0, MAX_CHARS);
+  if (!clean.trim()) return null;
+  const doc = { id: uid(), name: name || 'Untitled contract', kind: kind || 'Pasted', text: clean, added: Date.now(), status: 'new' };
+  state.docs.unshift(doc);
+  state.activeId = doc.id;
+  state.timelineCache[doc.id] = null;
+  return doc;
+}
+
+function analyze(doc) {
+  if (!doc) return;
+  if (state.busy) { toast('An analysis is already running', 'err'); return; }
+  state.busy = true;
+  state.activeId = doc.id;
+  doc.status = 'analyzing';
+  state.scanStep = 0;
+  if (currentView() !== 'risk') { go('risk'); } else { render(); }
+  const steps = REDUCED ? 1 : 3;
+  let i = 0;
+  const tick = () => {
+    i++;
+    state.scanStep = i;
+    render();
+    if (i < steps) { setTimeout(tick, REDUCED ? 90 : 430); return; }
+    if (!state.docs.some(d => d.id === doc.id)) { state.busy = false; render(); return; }
+    const res = computeFindings(doc.text);
+    state.analysis[doc.id] = res;
+    state.lastAnalyzedId = doc.id;
+    state.stats.analyzed = Object.keys(state.analysis).length;
+    doc.status = 'analyzed';
+    state.busy = false;
+    render();
+    if (res.findings.length) toast(res.findings.length + ' clause' + (res.findings.length > 1 ? 's' : '') + ' flagged — review the matrix');
+    else toast('Scan complete — no playbook matches');
+  };
+  setTimeout(tick, REDUCED ? 90 : 380);
+}
+
+function removeDoc(id) {
+  const doc = state.docs.find(d => d.id === id);
+  if (!doc) return;
+  state.docs = state.docs.filter(d => d.id !== id);
+  delete state.analysis[id]; delete state.redlines[id]; delete state.timelineCache[id];
+  if (state.activeId === id) state.activeId = state.docs[0] ? state.docs[0].id : null;
+  if (state.lastAnalyzedId === id) state.lastAnalyzedId = null;
+  state.stats.analyzed = Object.keys(state.analysis).length;
+  render();
+  toast('Removed from the matter file');
+}
+
+/* ---------- redlines ---------- */
+function buildRedlines(docId, onlyFid) {
+  const res = state.analysis[docId];
+  if (!res) return 0;
+  const list = state.redlines[docId] || (state.redlines[docId] = []);
+  let added = 0;
+  res.findings.forEach(f => {
+    if (onlyFid && f.id !== onlyFid) return;
+    if (list.some(r => r.fid === f.id)) return;
+    list.push({
+      id: uid(), fid: f.id, label: f.label, icon: f.rule.icon, sev: f.sev,
+      sent: f.sent, html: redlineHtml(f.sent, f.rule), proposal: f.rule.rewrite, adopted: false
+    });
+    added++;
+  });
+  if (added) state.stats.redlines += added;
+  return added;
+}
+function memoText(doc) {
+  const list = state.redlines[doc.id] || [];
+  const lines = [
+    'REDLINE MEMORANDUM',
+    'Matter file: ' + doc.name,
+    'Prepared locally by AutoClaw Legal Shield · ' + new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+    'Confidential — attorney work product (demo). Not legal advice.',
+    ''
+  ];
+  list.forEach((r, i) => {
+    lines.push((i + 1) + '. [' + SEV_LABEL[r.sev].toUpperCase() + '] ' + r.label + (r.adopted ? '  [ADOPTED]' : ''));
+    lines.push('   Clause: "' + r.sent + '"');
+    lines.push('   Counter-language: ' + r.proposal);
+    lines.push('');
+  });
+  return lines.join('\n');
+}
+
+/* ---------- render: shell ---------- */
+function renderTopbar() {
+  const doc = activeDoc();
+  const chip = $('#docChip');
+  if (!doc) { chip.hidden = true; return; }
+  chip.hidden = false;
+  $('#docChipName').textContent = doc.name;
+  const res = analysisOf(doc);
+  const dot = $('#docChipDot');
+  const v = res ? verdictOf(res.score) : null;
+  dot.style.background = v ? (v.k === 'high' ? 'var(--high)' : v.k === 'medium' ? 'var(--med)' : 'var(--low)') : 'var(--faint)';
+}
+
+/* ---------- render: dashboard ---------- */
+function countUp(el, value) {
+  const target = Number(value) || 0;
+  if (el.dataset.v === String(target)) { el.textContent = target; return; }
+  el.dataset.v = String(target);
+  if (REDUCED) { el.textContent = target; return; }
+  const from = Number(el.dataset.prev || 0), t0 = performance.now(), dur = 520;
+  el.dataset.prev = String(target);
+  const step = t => {
+    const p = Math.min(1, (t - t0) / dur);
+    el.textContent = Math.round(from + (target - from) * (1 - Math.pow(1 - p, 3)));
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function renderDashboard() {
+  const analyzed = Object.values(state.analysis);
+  const last = state.lastAnalyzedId ? state.analysis[state.lastAnalyzedId] : null;
+  countUp($('#kpiAnalyzed'), state.stats.analyzed);
+  countUp($('#kpiRedlines'), state.stats.redlines);
+  countUp($('#kpiPii'), state.stats.pii);
+
+  if (last) {
+    countUp($('#kpiScore'), last.score);
+    $('#kpiScoreOf').hidden = false;
+    const v = verdictOf(last.score);
+    $('#kpiScoreSub').textContent = v.label;
+  } else {
+    $('#kpiScore').textContent = '—';
+    $('#kpiScoreOf').hidden = true;
+    $('#kpiScoreSub').textContent = 'Awaiting analysis';
+  }
+  $('#kpiAnalyzedSub').textContent = state.docs.length ? state.docs.length + ' in the matter file' : 'No contracts yet';
+  $('#kpiRedlinesSub').textContent = state.stats.redlines ? 'Counter-proposals drafted' : 'Draft from the matrix';
+  $('#kpiPiiSub').textContent = state.stats.pii ? 'Redacted before processing' : 'Redact before analysis';
+
+  // risk profile chart
+  const chart = $('#catChart');
+  if (!last || !last.findings.length) {
+    chart.innerHTML = '<div class="empty" style="padding:26px 16px">' +
+      icon('gauge') + '<h3>No risk profile yet</h3>' +
+      '<p>Add a contract and run the matrix — clause families and severities land here.</p>' +
+      '<button class="btn primary sm" data-action="go-docs">Add a contract</button></div>';
+    $('#chartHint').textContent = 'Clause families flagged in the latest analysis.';
+  } else {
+    const byCat = {};
+    last.findings.forEach(f => {
+      const cur = byCat[f.cat] || { label: f.label, sev: 0, count: 0 };
+      cur.count++;
+      cur.sev = Math.max(cur.sev, { low: 0, medium: 1, high: 2 }[f.sev]);
+      byCat[f.cat] = cur;
+    });
+    const rows = Object.values(byCat).sort((a, b) => b.sev - a.sev || b.count - a.count);
+    const max = Math.max(...rows.map(r => r.count));
+    chart.innerHTML = rows.map(r => {
+      const color = r.sev === 2 ? 'var(--high)' : r.sev === 1 ? 'var(--med)' : 'var(--low)';
+      return '<div class="bar-row"><div class="bl"><span class="dot" style="background:' + color + '"></span><span>' + esc(r.label) + '</span></div>' +
+        '<div class="track"><span class="fill" style="width:' + Math.max(8, Math.round(r.count / max * 100)) + '%;background:' + color + '"></span></div>' +
+        '<div class="ct num">' + r.count + '</div></div>';
+    }).join('');
+    $('#chartHint').textContent = 'Latest scan · ' + last.findings.length + ' findings across ' + last.rules + ' clause families.';
+  }
+
+  // recent files
+  const recent = state.docs.slice(0, 5);
+  const wrap = $('#recentWrap');
+  if (!recent.length) {
+    wrap.innerHTML = '<div class="empty" style="padding:24px 16px">' + icon('files') +
+      '<h3>The matter file is empty</h3><p>Load a sample or drop a contract to open your first review.</p>' +
+      '<button class="btn sm" data-action="go-docs">Open matter files</button></div>';
+  } else {
+    wrap.innerHTML = '<div class="table-scroll"><table class="tbl"><thead><tr><th>Matter</th><th>Clauses</th><th>Risk</th><th>Status</th></tr></thead><tbody>' +
+      recent.map(d => {
+        const res = state.analysis[d.id];
+        const st = d.status === 'analyzed' ? '<span class="status ok">Analyzed</span>' : d.status === 'analyzing' ? '<span class="status run">Scanning</span>' : '<span class="status">Not analyzed</span>';
+        return '<tr data-action="open-doc" data-id="' + d.id + '" style="cursor:pointer">' +
+          '<td><span class="name">' + esc(d.name) + '</span><span class="sub">' + esc(d.kind) + '</span></td>' +
+          '<td class="num">' + (res ? res.findings.length : '—') + '</td>' +
+          '<td class="num">' + (res ? res.score : '—') + '</td>' +
+          '<td>' + st + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+  }
+
+  // steps
+  const hasDoc = state.docs.length > 0;
+  const hasScan = analyzed.length > 0;
+  const hasRl = state.stats.redlines > 0;
+  $('#stepsCard').innerHTML = [
+    { done: hasDoc, t: 'Add a contract', d: 'Upload a file or open a sample agreement.' },
+    { done: hasScan, t: 'Run the risk matrix', d: 'Ten clause families scored high, medium or low.' },
+    { done: hasRl, t: 'Draft and export', d: 'Counter-proposals, redline memo and fact timeline.' }
+  ].map(s => '<li class="' + (s.done ? 'done' : '') + '"><span><b>' + s.t + '</b>' + s.d + '</span></li>').join('');
+}
+
+/* ---------- render: documents ---------- */
+function renderDocs() {
+  $('#docCount').textContent = state.docs.length
+    ? state.docs.length + ' file' + (state.docs.length > 1 ? 's' : '') + ' in this session · nothing persisted'
+    : 'Nothing here yet — load a sample below or add your own.';
+  const list = $('#docList');
+  if (!state.docs.length) {
+    list.innerHTML = '<div class="empty">' + icon('files') + '<h3>No matter files yet</h3><p>Drop a contract above, paste its text, or open one of the samples below to see the full review flow.</p></div>';
+  } else {
+    list.innerHTML = state.docs.map(d => {
+      const st = d.status === 'analyzed' ? '<span class="status ok">Analyzed</span>' : d.status === 'analyzing' ? '<span class="status run">Scanning</span>' : '<span class="status">Not analyzed</span>';
+      return '<div class="doc-row"><span class="nm">' + esc(d.name) + '</span><span class="meta">' +
+        '<span class="tag">' + esc(d.kind) + '</span>' + st + '</span>' +
+        '<span class="acts">' +
+        (d.status !== 'analyzing' ? '<button class="btn sm" data-action="analyze" data-id="' + d.id + '">' + icon('scan') + (d.status === 'analyzed' ? 'Rescan' : 'Analyze') + '</button>' : '') +
+        '<button class="btn sm quiet" data-action="scrub-doc" data-id="' + d.id + '">' + icon('lock') + 'Scrub</button>' +
+        '<button class="icon-btn" data-action="remove-doc" data-id="' + d.id + '" aria-label="Remove ' + esc(d.name) + '">' + icon('trash') + '</button>' +
+        '</span></div>';
+    }).join('');
+  }
+  $('#sampleGrid').innerHTML = SAMPLES.map((s, i) =>
+    '<button class="sample" data-action="sample" data-i="' + i + '">' +
+      '<span class="top">' + icon(s.icon) + '<span class="ft" style="margin-left:auto">' + esc(s.kind) + '</span></span>' +
+      '<span class="nm">' + esc(s.name) + '</span>' +
+      '<span class="ds">' + esc(s.desc) + '</span>' +
+      '<span class="ft"><span>' + (s.text.length / 1000).toFixed(1) + 'k chars</span><span>Open &amp; scan</span></span>' +
+    '</button>').join('');
+}
+
+/* ---------- render: risk ---------- */
+function renderRisk() {
+  const doc = activeDoc();
+  const summary = $('#riskSummary'), filters = $('#sevFilters'), list = $('#findings');
+  if (!doc) {
+    $('#riskMeta').textContent = 'Open a matter file to scan its clauses against the review playbook.';
+    summary.innerHTML = ''; filters.innerHTML = '';
+    list.innerHTML = '<div class="empty">' + icon('shield') + '<h3>No contract open</h3><p>Add a contract or load a sample to build its risk matrix.</p><button class="btn primary" data-action="go-docs">Open matter files</button></div>';
+    return;
+  }
+  if (doc.status === 'analyzing') {
+    $('#riskMeta').textContent = 'Scanning ' + doc.name + ' — this stays on your machine.';
+    const steps = ['Parsing clauses and defined terms', 'Scoring severity against the playbook', 'Drafting counter-language positions'];
+    summary.innerHTML = '<div class="panel scan" data-od-id="scan">' +
+      '<div style="display:flex;align-items:center;gap:9px"><span class="sev medium">Scan in progress</span><span class="hint" style="margin:0">' + esc(doc.name) + '</span></div>' +
+      '<div class="lines"><span class="beam"></span></div>' +
+      '<ul class="scan-steps">' + steps.map((s, i) => {
+        const cls = i < state.scanStep - 1 ? 'done' : i === state.scanStep - 1 ? 'now' : '';
+        return '<li class="' + cls + '">' + icon(i < state.scanStep - 1 ? 'check' : 'refresh') + esc(s) + '</li>';
+      }).join('') + '</ul></div>';
+    filters.innerHTML = '';
+    list.innerHTML = '<div class="empty" style="margin-top:12px">' + icon('scan') + '<h3>Reading the agreement</h3><p>Clause extraction and severity scoring run locally; nothing is transmitted.</p></div>';
+    return;
+  }
+  const res = analysisOf(doc);
+  $('#riskMeta').textContent = doc.name + ' · ' + doc.kind + ' · ' + (doc.text.length / 1000).toFixed(1) + 'k characters';
+  if (!res) {
+    summary.innerHTML = '';
+    filters.innerHTML = '';
+    list.innerHTML = '<div class="empty">' + icon('scan') + '<h3>Ready to scan</h3><p>' + esc(doc.name) + ' is in the matter file but has not been analyzed yet.</p><button class="btn primary" data-action="analyze" data-id="' + doc.id + '">' + icon('scan') + 'Run risk matrix</button></div>';
+    return;
+  }
+  const v = verdictOf(res.score);
+  summary.innerHTML = '<div class="panel rsum ' + (v.k === 'high' ? 'v-high' : v.k === 'medium' ? 'v-medium' : 'v-low') + '" data-od-id="risk-summary">' +
+    '<div class="gauge-wrap"><svg class="gauge" viewBox="0 0 160 92" role="img" aria-label="Risk score ' + res.score + ' of 100">' +
+      '<path class="track" d="M20 82 A60 60 0 0 1 140 82"/>' +
+      '<path class="val" pathLength="100" stroke-dasharray="' + Math.max(0, res.score) + ' 100" d="M20 82 A60 60 0 0 1 140 82"/>' +
+    '</svg><div class="gnum">' + res.score + '<small>/100</small></div></div>' +
+    '<div class="rsum-body"><p class="eyebrow">Risk score</p><h2 class="verdict">' + v.label + '</h2>' +
+    '<p class="hint">' + res.counts.high + ' high · ' + res.counts.medium + ' medium · ' + res.counts.low + ' low findings across ' + res.rules + ' clause families.</p>' +
+    '<div class="sevrow">' + (res.findings.length ? [['high', res.counts.high], ['medium', res.counts.medium], ['low', res.counts.low]].filter(x => x[1] > 0).map(x => '<span class="sev ' + x[0] + '">' + SEV_LABEL[x[0]] + ' ' + x[1] + '</span>').join('') : '<span class="sev low">Clean</span>') + '</div>' +
+    '<div class="acts"><button class="btn primary sm" data-action="redline-all">' + icon('pen') + 'Draft all redlines</button>' +
+    '<button class="btn sm" data-action="analyze" data-id="' + doc.id + '">' + icon('refresh') + 'Rescan</button>' +
+    '<button class="btn sm quiet" data-action="scrub-doc" data-id="' + doc.id + '">' + icon('lock') + 'Scrub PII</button></div>' +
+    (res.capped ? '<p class="rsum-note">Long document — scanned the first ' + (MAX_CHARS / 1000) + ',000 characters.</p>' : '') +
+    '</div></div>';
+
+  const f = state.sevFilter;
+  filters.innerHTML = '<div class="filters">' + [['all', 'All', res.findings.length], ['high', 'High', res.counts.high], ['medium', 'Medium', res.counts.medium], ['low', 'Low', res.counts.low]]
+    .map(([k, lbl, n]) => '<button class="chip ' + (f === k ? 'on' : '') + '" data-action="filter-sev" data-sev="' + k + '" aria-pressed="' + (f === k) + '">' + lbl + ' <b>' + n + '</b></button>').join('') + '</div>';
+
+  const rows = res.findings.filter(x => f === 'all' || x.sev === f);
+  if (!rows.length) {
+    list.innerHTML = '<div class="empty">' + icon('check') + '<h3>' + (f === 'all' ? 'No playbook matches' : 'Nothing in this band') + '</h3>' +
+      '<p>' + (f === 'all' ? 'The scan found no language matching the ten review families. Standard watch items still apply.' : 'Switch the filter to see findings at other severities.') + '</p></div>';
+    return;
+  }
+  list.innerHTML = '<div class="finds">' + rows.map(x =>
+    '<article class="find" data-od-id="finding">' +
+      '<header><span class="fic">' + icon(x.rule.icon) + '</span>' +
+      '<div><h3>' + esc(x.label) + '</h3><p class="loc">' + esc(x.loc) + ' · clause family ' + esc(x.rule.id) + '</p></div>' +
+      '<span class="sev ' + x.sev + '">' + SEV_LABEL[x.sev] + '</span></header>' +
+      '<div class="excerpt">' + markClause(x.sent, x.rule) + '</div>' +
+      '<p class="why">' + esc(x.rule.why) + '</p>' +
+      '<footer><button class="btn primary sm" data-action="redline" data-fid="' + x.id + '">' + icon('pen') + 'Draft counter-language</button>' +
+      '<button class="btn quiet sm" data-action="copy-clause" data-fid="' + x.id + '">' + icon('copy') + 'Copy clause</button></footer>' +
+    '</article>').join('') + '</div>';
+}
+
+/* ---------- render: redlines ---------- */
+function renderRedlines() {
+  const doc = activeDoc();
+  const box = $('#rlList');
+  if (!doc) {
+    $('#rlMeta').textContent = 'Draft balanced replacement language for each flagged clause, then export the memo.';
+    $('#rlCount').textContent = 'No proposals yet.';
+    box.innerHTML = '<div class="empty">' + icon('pen') + '<h3>No contract open</h3><p>Pick a matter file and run the risk matrix first.</p><button class="btn primary" data-action="go-docs">Open matter files</button></div>';
+    return;
+  }
+  const res = analysisOf(doc);
+  const list = state.redlines[doc.id] || [];
+  const adopted = list.filter(r => r.adopted).length;
+  $('#rlMeta').textContent = doc.name + ' · ' + (res ? res.findings.length + ' flagged clauses' : 'not analyzed yet');
+  $('#rlCount').textContent = list.length
+    ? list.length + ' counter-proposal' + (list.length > 1 ? 's' : '') + ' · ' + adopted + ' adopted · export includes every entry'
+    : (res ? 'No proposals yet — draft them all or pick a clause in the matrix.' : 'Run the risk matrix to seed proposals.');
+
+  if (!list.length) {
+    box.innerHTML = '<div class="empty">' + icon('pen') + '<h3>No counter-proposals yet</h3>' +
+      '<p>' + (res ? 'Generate redlines from the ' + res.findings.length + ' flagged clauses, or draft them one at a time from the risk matrix.' : 'The risk matrix has not run on this contract yet.') + '</p>' +
+      (res ? '<button class="btn primary" data-action="redline-all">' + icon('pen') + 'Generate all redlines</button>'
+           : '<button class="btn primary" data-action="analyze" data-id="' + doc.id + '">' + icon('scan') + 'Run risk matrix</button>') + '</div>';
+    return;
+  }
+  box.innerHTML = '<div class="finds">' + list.map(r =>
+    '<article class="rl ' + (r.adopted ? 'adopted' : '') + '">' +
+      '<header><span class="fic" style="width:28px;height:28px;border-radius:7px;background:var(--raised);border:1px solid var(--line);display:grid;place-items:center;color:var(--accent-ink)">' + icon(r.icon) + '</span>' +
+      '<h3>' + esc(r.label) + '</h3><span class="sev ' + r.sev + '">' + SEV_LABEL[r.sev] + '</span>' +
+      (r.adopted ? '<span class="status ok" style="margin-left:auto">Adopted</span>' : '') + '</header>' +
+      '<div class="pair"><span class="lbl">' + (r.html ? 'Redline' : 'Original clause') + '</span><div class="excerpt">' + (r.html || esc(r.sent)) + '</div></div>' +
+      '<div class="pair"><span class="lbl">Counter-language</span><div class="prop">' + esc(r.proposal) + '</div></div>' +
+      '<footer><button class="btn sm ' + (r.adopted ? 'adopt' : '') + '" data-action="adopt" data-rid="' + r.id + '" aria-pressed="' + r.adopted + '">' + icon('check') + (r.adopted ? 'Adopted' : 'Mark adopted') + '</button>' +
+      '<button class="btn quiet sm" data-action="copy-rl-clause" data-rid="' + r.id + '">' + icon('copy') + 'Copy original</button>' +
+      '<button class="btn quiet sm" data-action="copy-rl-prop" data-rid="' + r.id + '">' + icon('copy') + 'Copy counter-language</button></footer>' +
+    '</article>').join('') + '</div>';
+}
+
+/* ---------- render: timeline ---------- */
+function timelineFor(doc) {
+  if (!doc) return [];
+  if (!state.timelineCache[doc.id]) state.timelineCache[doc.id] = buildTimeline(doc.text);
+  return state.timelineCache[doc.id];
+}
+function renderTimeline() {
+  const doc = activeDoc();
+  const wrap = $('#tlWrap'), filters = $('#tlFilters');
+  if (!doc) {
+    $('#tlMeta').textContent = 'Dates, parties, obligations and milestones extracted into one chronological record.';
+    $('#tlCount').textContent = 'No facts indexed yet.';
+    filters.innerHTML = '';
+    wrap.innerHTML = '<div class="empty">' + icon('clock') + '<h3>No contract open</h3><p>Open a matter file and its dates, parties and duties are indexed here automatically.</p><button class="btn primary" data-action="go-docs">Open matter files</button></div>';
+    return;
+  }
+  const events = timelineFor(doc);
+  $('#tlMeta').textContent = doc.name + ' · ' + (events.length ? events.length + ' indexed facts' : 'no dated facts found');
+  const counts = { all: events.length };
+  ['Milestone', 'Obligation', 'Financial', 'Party', 'Date'].forEach(t => { counts[t] = events.filter(e => e.type === t).length; });
+  $('#tlCount').textContent = events.length ? events.length + ' facts · chronological, undated last' : 'No facts indexed yet.';
+
+  filters.innerHTML = [['all', 'All'], ['Milestone', 'Milestones'], ['Obligation', 'Obligations'], ['Financial', 'Financial'], ['Party', 'Parties'], ['Date', 'Dates']]
+    .filter(([k]) => k === 'all' || counts[k] > 0)
+    .map(([k, lbl]) => '<button class="chip ' + (state.tlFilter === k ? 'on' : '') + '" data-action="filter-tl" data-type="' + k + '" aria-pressed="' + (state.tlFilter === k) + '">' + lbl + ' <b>' + (counts[k] || 0) + '</b></button>').join('');
+
+  const rows = events.filter(e => state.tlFilter === 'all' || e.type === state.tlFilter);
+  if (!rows.length) {
+    wrap.innerHTML = '<div class="empty">' + icon('clock') + '<h3>' + (events.length ? 'Nothing in this filter' : 'No dated facts found') + '</h3>' +
+      '<p>' + (events.length ? 'Switch the filter to see the rest of the index.' : 'This agreement may not state explicit dates. Obligations are still tracked in the matrix.') + '</p></div>';
+    return;
+  }
+  wrap.innerHTML = '<div class="table-scroll"><table class="tbl"><thead><tr><th style="width:110px">When</th><th style="width:120px">Type</th><th>Fact</th><th>Evidence</th></tr></thead><tbody>' +
+    rows.map(e => '<tr><td class="when">' + fmtWhen(e.t) + '</td><td><span class="tag">' + esc(e.type) + '</span></td>' +
+      '<td>' + esc(e.entry) + '</td><td class="evd evidence">' + esc(e.evd) + '</td></tr>').join('') +
+    '</tbody></table></div>';
+}
+
+/* ---------- render: security ---------- */
+function renderSecurity() {
+  const area = $('#scrubText');
+  if (area.value !== state.scrubText) area.value = state.scrubText;
+  const res = runScrub(state.scrubText, state.scrubFlags);
+  $('#scrubToggles').innerHTML = SCRUB.map(s =>
+    '<label class="tgl"><input type="checkbox" data-scrub="' + s.id + '"' + (state.scrubFlags[s.id] ? ' checked' : '') + '>' +
+    '<span class="sw"></span><span class="nm">' + esc(s.label) + '</span><span class="ct">' + res.counts[s.id] + '</span></label>').join('');
+  $('#scrubStat').innerHTML = '<span><b>' + state.scrubText.length.toLocaleString('en-US') + '</b> characters in</span>' +
+    '<span><b>' + res.total + '</b> items redacted</span>' +
+    '<span><b>' + SCRUB.filter(s => state.scrubFlags[s.id]).length + '/' + SCRUB.length + '</b> filters on</span>';
+  const preview = $('#scrubPreview');
+  if (!state.scrubText.trim()) {
+    preview.innerHTML = '<span class="dim">The scrubbed working copy appears here. Load a contract or paste text to begin.</span>';
+  } else {
+    preview.innerHTML = esc(res.out).replace(/\[(REDACTED-[A-Z$]+)\]/g, (m, g) => '<span class="rtag">[' + g + ']</span>');
+  }
+}
+
+/* ---------- master render ---------- */
+function render() {
+  renderTopbar();
+  renderDashboard();
+  renderDocs();
+  renderRisk();
+  renderRedlines();
+  renderTimeline();
+  renderSecurity();
+}
+
+/* ---------- interactions ---------- */
+function setErr(container, msg, extra) {
+  const el = $(container);
+  if (!el) return;
+  el.innerHTML = '<div class="formerr" role="alert">' + icon('alert') + '<div>' + esc(msg) +
+    (extra ? ' <button type="button" data-action="' + extra.action + '">' + esc(extra.label) + '</button>' : '') + '</div></div>';
+}
+function clearErr(container) { const el = $(container); if (el) el.innerHTML = ''; }
+
+function handleFile(file) {
+  clearErr('#upErr');
+  if (!file) return;
+  if (!/\.(pdf|docx|txt)$/i.test(file.name || '')) {
+    setErr('#upErr', 'That file type is not accepted. Choose a .pdf, .docx, or .txt contract.');
+    return;
+  }
+  if (file.size > MAX_FILE) {
+    setErr('#upErr', 'That file is ' + fmtSize(file.size) + ' — the limit is 10 MB. Split it or paste the relevant clauses instead.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onerror = () => setErr('#upErr', 'The file could not be read. It may be corrupted — try another copy, or paste the text instead.', { action: 'open-paste', label: 'Paste text instead' });
+  reader.onload = () => {
+    const raw = String(reader.result || '');
+    const head = raw.slice(0, 1000);
+    const binary = /[\x00-\x08\x0E-\x1F]/.test(head) || /^(%PDF|PK)/.test(raw.trim().slice(0, 4));
+    if (!raw.trim()) {
+      setErr('#upErr', 'That file is empty. Paste the contract text instead.', { action: 'open-paste', label: 'Paste text' });
+      return;
+    }
+    if (binary) {
+      setErr('#upErr', 'PDF and DOCX payloads cannot be decoded in this local demo. Paste the contract text to run the same analysis.', { action: 'open-paste', label: 'Paste text instead' });
+      return;
+    }
+    const doc = addDoc((file.name || 'Uploaded contract').replace(/\.[^.]+$/, ''), raw, 'Upload');
+    if (!doc) { setErr('#upErr', 'That contract is already in the matter file.'); return; }
+    toast('Added to the matter file — scanning now');
+    analyze(doc);
+  };
+  reader.readAsText(file);
+}
+
+document.addEventListener('click', async (e) => {
+  const nav = e.target.closest('#nav a');
+  if (nav) { closeNav(); return; }
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const act = btn.dataset.action;
+  const doc = activeDoc();
+  const res = doc ? analysisOf(doc) : null;
+
+  switch (act) {
+    case 'go-docs': go('documents'); break;
+    case 'pick-file': $('#fileInput').click(); break;
+    case 'open-paste': $('#pastePanel').hidden = false; $('#pasteToggle').setAttribute('aria-expanded', 'true'); $('#pasteText').focus(); break;
+    case 'demo-nda': {
+      const d = addDoc(SAMPLES[0].name, SAMPLES[0].text, 'NDA');
+      if (d) analyze(d);
+      break;
+    }
+    case 'sample': {
+      const s = SAMPLES[Number(btn.dataset.i)];
+      if (!s) break;
+      const d = addDoc(s.name, s.text, s.kind);
+      if (d) analyze(d); else toast('That sample is already in the matter file', 'err');
+      break;
+    }
+    case 'analyze': {
+      const d = state.docs.find(x => x.id === btn.dataset.id);
+      if (d) { clearErr('#upErr'); analyze(d); }
+      break;
+    }
+    case 'remove-doc': removeDoc(btn.dataset.id); break;
+    case 'scrub-doc': {
+      const d = state.docs.find(x => x.id === btn.dataset.id);
+      if (d) {
+        state.scrubText = d.text;
+        state.scrubSource = d.name;
+        go('security');
+        toast('Loaded ' + d.name + ' into the redaction bench');
+      }
+      break;
+    }
+    case 'open-doc': {
+      const d = state.docs.find(x => x.id === btn.dataset.id);
+      if (d) { state.activeId = d.id; go(d.status === 'analyzed' ? 'risk' : 'documents'); }
+      break;
+    }
+    case 'filter-sev': state.sevFilter = btn.dataset.sev; renderRisk(); break;
+    case 'filter-tl': state.tlFilter = btn.dataset.type; renderTimeline(); break;
+    case 'redline': {
+      if (!doc) break;
+      const added = buildRedlines(doc.id, btn.dataset.fid);
+      toast(added ? 'Counter-language drafted' : 'This clause already has a proposal');
+      go('redlines');
+      break;
+    }
+    case 'redline-all': {
+      if (!doc || !res) { toast('Run the risk matrix first', 'err'); break; }
+      const added = buildRedlines(doc.id);
+      if (currentView() !== 'redlines') go('redlines'); else render();
+      toast(added ? added + ' counter-proposals drafted' : 'Every flagged clause already has a proposal');
+      break;
+    }
+    case 'adopt': {
+      if (!doc) break;
+      const list = state.redlines[doc.id] || [];
+      const item = list.find(r => r.id === btn.dataset.rid);
+      if (item) { item.adopted = !item.adopted; renderRedlines(); renderTopbar(); }
+      break;
+    }
+    case 'copy-clause': {
+      if (!res) break;
+      const f = res.findings.find(x => x.id === btn.dataset.fid);
+      if (f) toast(await copyText(f.sent) ? 'Clause copied' : 'Copy was blocked — select the text manually', 'ok');
+      break;
+    }
+    case 'copy-rl-clause': {
+      const item = (state.redlines[doc.id] || []).find(r => r.id === btn.dataset.rid);
+      if (item) toast(await copyText(item.sent) ? 'Original clause copied' : 'Copy was blocked', 'ok');
+      break;
+    }
+    case 'copy-rl-prop': {
+      const item = (state.redlines[doc.id] || []).find(r => r.id === btn.dataset.rid);
+      if (item) toast(await copyText(item.proposal) ? 'Counter-language copied' : 'Copy was blocked', 'ok');
+      break;
+    }
+    case 'copy-memo': {
+      if (!doc || !(state.redlines[doc.id] || []).length) { toast('Generate redlines first', 'err'); break; }
+      toast(await copyText(memoText(doc)) ? 'Redline memo copied' : 'Copy was blocked', 'ok');
+      break;
+    }
+    case 'download-memo': {
+      if (!doc || !(state.redlines[doc.id] || []).length) { toast('Generate redlines first', 'err'); break; }
+      if (download('redline-memo-' + SLUG(doc.name) + '.txt', memoText(doc))) toast('Memo downloaded');
+      break;
+    }
+    case 'export-csv': {
+      if (!doc) { toast('Open a contract first', 'err'); break; }
+      const ev = timelineFor(doc);
+      if (!ev.length) { toast('No facts to export', 'err'); break; }
+      const rows = [['When', 'Type', 'Fact', 'Evidence']].concat(ev.map(x => [isNaN(x.t) ? '' : fmtWhen(x.t), x.type, x.entry, x.evd]));
+      const cell = c => { const s = String(c); return '"' + (/^[=+\-@\t\r]/.test(s) ? '\'' : '') + s.replace(/"/g, '""') + '"'; };
+      const csv = rows.map(r => r.map(cell).join(',')).join('\r\n');
+      if (download('fact-timeline-' + SLUG(doc.name) + '.csv', csv, 'text/csv')) toast('Timeline exported as CSV');
+      break;
+    }
+    case 'copy-table': {
+      if (!doc) { toast('Open a contract first', 'err'); break; }
+      const ev = timelineFor(doc);
+      if (!ev.length) { toast('No facts to copy', 'err'); break; }
+      const txt = ['When | Type | Fact | Evidence'].concat(ev.map(x => fmtWhen(x.t) + ' | ' + x.type + ' | ' + x.entry + ' | ' + x.evd)).join('\n');
+      toast(await copyText(txt) ? 'Timeline copied' : 'Copy was blocked', 'ok');
+      break;
+    }
+    case 'load-active': {
+      if (!doc) { toast('No active contract — load a sample first', 'err'); break; }
+      state.scrubText = doc.text; state.scrubSource = doc.name; renderSecurity();
+      toast('Loaded ' + doc.name);
+      break;
+    }
+    case 'load-nda': {
+      state.scrubText = SAMPLES[0].text; state.scrubSource = SAMPLES[0].name; renderSecurity();
+      toast('Sample NDA loaded into the bench');
+      break;
+    }
+    case 'reset': {
+      state.docs = []; state.activeId = null; state.lastAnalyzedId = null;
+      state.analysis = {}; state.redlines = {}; state.timelineCache = {};
+      state.stats = { analyzed: 0, redlines: 0, pii: 0 };
+      state.scrubText = ''; state.scrubSource = '';
+      SCRUB.forEach(s => { state.scrubFlags[s.id] = true; });
+      state.sevFilter = 'all'; state.tlFilter = 'all';
+      $('#upErr').innerHTML = ''; $('#pasteErr').innerHTML = ''; $('#scrubErr').innerHTML = '';
+      render();
+      toast('Session cleared');
+      break;
+    }
+  }
+});
+
+/* scrub toggles + live input */
+$('#scrubToggles').addEventListener('change', e => {
+  const cb = e.target.closest('input[data-scrub]');
+  if (!cb) return;
+  const key = cb.dataset.scrub;
+  state.scrubFlags[key] = cb.checked;
+  renderSecurity();
+  const again = $('#scrubToggles input[data-scrub="' + key + '"]');
+  if (again) again.focus();
+});
+
+let scrubTimer = null;
+$('#scrubText').addEventListener('input', e => {
+  state.scrubText = e.target.value;
+  state.scrubSource = state.scrubSource || 'Pasted text';
+  clearTimeout(scrubTimer);
+  scrubTimer = setTimeout(() => {
+    const res = runScrub(state.scrubText, state.scrubFlags);
+    $('#scrubStat').innerHTML = '<span><b>' + state.scrubText.length.toLocaleString('en-US') + '</b> characters in</span><span><b>' + res.total + '</b> items redacted</span><span><b>' + SCRUB.filter(s => state.scrubFlags[s.id]).length + '/' + SCRUB.length + '</b> filters on</span>';
+    const preview = $('#scrubPreview');
+    preview.innerHTML = state.scrubText.trim()
+      ? esc(res.out).replace(/\[(REDACTED-[A-Z$]+)\]/g, (m, g) => '<span class="rtag">[' + g + ']</span>')
+      : '<span class="dim">The scrubbed working copy appears here. Load a contract or paste text to begin.</span>';
+    $('#scrubToggles').innerHTML = SCRUB.map(s => '<label class="tgl"><input type="checkbox" data-scrub="' + s.id + '"' + (state.scrubFlags[s.id] ? ' checked' : '') + '><span class="sw"></span><span class="nm">' + esc(s.label) + '</span><span class="ct">' + res.counts[s.id] + '</span></label>').join('');
+  }, 130);
+});
+
+$('#scrubAnalyze').addEventListener('click', () => {
+  clearErr('#scrubErr');
+  const text = state.scrubText.trim();
+  if (text.length < 40) {
+    setErr('#scrubErr', 'Add at least a few sentences before analyzing — the scrubber needs clause text to work with.');
+    return;
+  }
+  const res = runScrub(state.scrubText, state.scrubFlags);
+  if (res.total) state.stats.pii += res.total;
+  const source = state.scrubSource || 'Pasted contract';
+  const doc = addDoc(trim(source, 48) + ' — scrubbed', res.out, 'Scrubbed');
+  if (!doc) { setErr('#scrubErr', 'A scrubbed copy of this text is already in the matter file.'); return; }
+  toast(res.total + ' items redacted — analyzing the working copy');
+  analyze(doc);
+});
+
+$('#scrubCopy').addEventListener('click', async () => {
+  if (!state.scrubText.trim()) { toast('Nothing to copy yet', 'err'); return; }
+  const res = runScrub(state.scrubText, state.scrubFlags);
+  toast(await copyText(res.out) ? 'Scrubbed text copied' : 'Copy was blocked', 'ok');
+});
+
+/* upload wiring */
+$('#fileInput').addEventListener('change', e => {
+  handleFile(e.target.files && e.target.files[0]);
+  e.target.value = '';
+});
+const drop = $('#drop');
+['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => handleFile(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]));
+drop.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#fileInput').click(); }
+});
+
+/* paste wiring */
+$('#pasteToggle').addEventListener('click', () => {
+  const panel = $('#pastePanel');
+  const open = panel.hidden;
+  panel.hidden = !open;
+  $('#pasteToggle').setAttribute('aria-expanded', String(open));
+  if (open) $('#pasteText').focus();
+});
+$('#pasteSubmit').addEventListener('click', () => {
+  clearErr('#pasteErr');
+  const text = $('#pasteText').value.trim();
+  if (text.length < 40) { setErr('#pasteErr', 'Add at least a few sentences of contract text to analyze.'); return; }
+  const name = $('#pasteName').value.trim() || 'Pasted contract';
+  const doc = addDoc(name, text, 'Pasted');
+  if (!doc) { setErr('#pasteErr', 'That contract is already in the matter file.'); return; }
+  $('#pasteText').value = ''; $('#pasteName').value = '';
+  toast('Added to the matter file — scanning now');
+  analyze(doc);
+});
+
+/* nav / sidebar */
+const sidebar = $('#sidebar'), backdrop = $('#backdrop'), menuBtn = $('#menuBtn');
+function closeNav() {
+  sidebar.classList.remove('open');
+  backdrop.classList.remove('on');
+  menuBtn.setAttribute('aria-expanded', 'false');
+}
+menuBtn.addEventListener('click', () => {
+  const open = !sidebar.classList.contains('open');
+  sidebar.classList.toggle('open', open);
+  backdrop.classList.toggle('on', open);
+  menuBtn.setAttribute('aria-expanded', String(open));
+  if (open) { const first = sidebar.querySelector('a'); if (first) first.focus(); }
+});
+backdrop.addEventListener('click', closeNav);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNav(); });
+$('#docChip').addEventListener('click', () => go('risk'));
+
+window.addEventListener('hashchange', applyRoute);
+
+/* boot */
+if (!location.hash) location.hash = '#/dashboard';
+applyRoute();
+render();
+</script>
+</body>
+</html>
